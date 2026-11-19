@@ -8,6 +8,7 @@ type: software
 authors:
   - family-names: "Kızıloğlu"
     given-names: "Volkan"
+    orcid: "https://orcid.org/0000-0002-0463-1219"
 repository-code: "https://github.com/volkankiziloglu-dev/GaAsPN-DD-solver-publication"
 keywords:
   - drift-diffusion
