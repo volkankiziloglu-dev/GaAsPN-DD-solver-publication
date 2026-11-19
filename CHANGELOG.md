@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (unreleased)
+## 1.0.0 (2026-11-19)
 
 Publication snapshot of the solver and the paper scripts.
 

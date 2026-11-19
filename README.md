@@ -1,6 +1,7 @@
 # GaAsPN QFP drift-diffusion solver: publication snapshot
 
-Version 1.0.0 (unreleased). Author: Volkan Kızıloğlu.
+Version 1.0.0 (2026-11-19). Author: Volkan Kızıloğlu.
+Repository: https://github.com/volkankiziloglu-dev/GaAsPN-DD-solver-publication
 
 MATLAB code of a one-dimensional quasi-Fermi-potential (QFP) drift-diffusion solver for
 heterojunction solar cells and the scripts that produce the results, figures and tables of the paper
@@ -101,4 +102,4 @@ indoor rows otherwise; `merge_unified.py` combines them.
 
 Code: BSD 3-Clause (`LICENSE`). Author-generated data and documentation: CC BY 4.0
 (`LICENSE-data.md`); third-party files keep their own terms (CIE files: CC BY-SA 4.0).
-Please cite the software as given in `CITATION.cff` (repository URL and DOI to be added) and the paper.
+Please cite the software as given in `CITATION.cff` (the archived release has a Zenodo DOI) and the paper.

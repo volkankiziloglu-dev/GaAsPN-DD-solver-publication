@@ -2,16 +2,13 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "GaAsPN QFP drift-diffusion solver: publication snapshot"
 version: 1.0.0
+date-released: 2026-11-19
 license: BSD-3-Clause
 type: software
 authors:
   - family-names: "Kızıloğlu"
     given-names: "Volkan"
-repository-code: "https://example.invalid/REPLACE-WITH-REPOSITORY-URL"
-identifiers:
-  - type: doi
-    value: "10.5281/zenodo.0000000"
-    description: "PLACEHOLDER: replace with the archive DOI after deposition"
+repository-code: "https://github.com/volkankiziloglu-dev/GaAsPN-DD-solver-publication"
 keywords:
   - drift-diffusion
   - quasi-Fermi potential
