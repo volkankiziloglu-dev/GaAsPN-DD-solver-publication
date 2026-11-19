@@ -1,5 +1,7 @@
 # GaAsPN QFP drift-diffusion solver: publication snapshot
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24377199.svg)](https://doi.org/10.5281/zenodo.24377199)
+
 Version 1.0.0 (2026-11-19). Author: Volkan Kızıloğlu.
 Repository: https://github.com/volkankiziloglu-dev/GaAsPN-DD-solver-publication
 
@@ -102,4 +104,4 @@ indoor rows otherwise; `merge_unified.py` combines them.
 
 Code: BSD 3-Clause (`LICENSE`). Author-generated data and documentation: CC BY 4.0
 (`LICENSE-data.md`); third-party files keep their own terms (CIE files: CC BY-SA 4.0).
-Please cite the software as given in `CITATION.cff` (the archived release has a Zenodo DOI) and the paper.
+Please cite the software as given in `CITATION.cff` (release v1.0.0-paper: https://doi.org/10.5281/zenodo.24377199) and the paper.

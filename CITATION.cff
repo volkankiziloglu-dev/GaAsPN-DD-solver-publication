@@ -10,6 +10,14 @@ authors:
     given-names: "Volkan"
     orcid: "https://orcid.org/0000-0002-0463-1219"
 repository-code: "https://github.com/volkankiziloglu-dev/GaAsPN-DD-solver-publication"
+doi: 10.5281/zenodo.24377199
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24377199
+    description: "Archived release v1.0.0-paper (version DOI)"
+  - type: doi
+    value: 10.5281/zenodo.24377198
+    description: "All versions (concept DOI)"
 keywords:
   - drift-diffusion
   - quasi-Fermi potential
