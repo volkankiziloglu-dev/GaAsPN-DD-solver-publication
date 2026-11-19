@@ -1,0 +1,21 @@
+sampling,condition,quantity,parameter,spearman,prcc,n
+sampling 1,AM1.5G,RBSF-GaP-RHJ,tauAbs,-0.868,-0.937,60
+sampling 1,6500K_1000lx,RBSF-GaP-RHJ,tauAbs,-0.792,-0.877,60
+sampling 1,AM1.5G,RBSF-GaP-RHJ,chiGaP,0.295,0.674,60
+sampling 1,6500K_1000lx,RBSF-GaP-RHJ,chiGaP,0.348,0.636,60
+sampling 1,AM1.5G,PCE HJ-0,Nabs,0.8,0.98,60
+sampling 1,6500K_1000lx,PCE HJ-0,Nabs,0.702,0.938,60
+sampling 1,AM1.5G,PCE RBSF-GaP,Nabs,0.37,0.818,60
+sampling 1,6500K_1000lx,PCE RBSF-GaP,Nabs,0.268,0.864,60
+sampling 2,AM1.5G,RBSF-GaP-RHJ,ratio,-0.831,-0.909,60
+sampling 2,6500K_1000lx,RBSF-GaP-RHJ,ratio,-0.84,-0.927,60
+sampling 2,AM1.5G,RBSF-GaP-RHJ,tauP,-0.498,-0.693,60
+sampling 2,6500K_1000lx,RBSF-GaP-RHJ,tauP,-0.516,-0.746,60
+sampling 2,AM1.5G,RBSF-GaP-RHJ,Sback,0.064,-0.014,60
+sampling 2,6500K_1000lx,RBSF-GaP-RHJ,Sback,0.073,0.018,60
+sampling 2,AM1.5G,PCE HJ-0,Sback,-0.415,-0.775,60
+sampling 2,6500K_1000lx,PCE HJ-0,Sback,-0.297,-0.681,60
+sampling 2,AM1.5G,PCE HJ-0,Sint,-0.015,-0.052,60
+sampling 2,6500K_1000lx,PCE HJ-0,Sint,-0.044,-0.041,60
+sampling 2,AM1.5G,PCE RHJ,ratio,0.627,0.956,60
+sampling 2,6500K_1000lx,PCE RHJ,ratio,0.633,0.931,60

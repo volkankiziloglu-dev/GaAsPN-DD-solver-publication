@@ -1,0 +1,21 @@
+Architecture,Condition,CollectionScale,Rs,Rsh,Jsc,Voc_mV,FF_pct,PCE_pct,Class
+HJ-0,AM1.5G,1,0,Inf,NaN,NaN,NaN,NaN,AM15G
+HJ-0,AM1.5G,0.46,0,Inf,NaN,NaN,NaN,NaN,AM15G
+HJ-0,AM1.5G,0.46,0,631,NaN,NaN,NaN,NaN,AM15G+Rsh
+HJ-0,6500K_1000lx,1,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+HJ-0,6500K_1000lx,0.46,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+F-HJ,AM1.5G,1,0,Inf,NaN,NaN,NaN,NaN,AM15G
+F-HJ,AM1.5G,0.46,0,Inf,NaN,NaN,NaN,NaN,AM15G
+F-HJ,AM1.5G,0.46,0,631,NaN,NaN,NaN,NaN,AM15G+Rsh
+F-HJ,6500K_1000lx,1,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+F-HJ,6500K_1000lx,0.46,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+RBSF-GaP,AM1.5G,1,0,Inf,NaN,NaN,NaN,NaN,AM15G
+RBSF-GaP,AM1.5G,0.46,0,Inf,NaN,NaN,NaN,NaN,AM15G
+RBSF-GaP,AM1.5G,0.46,0,631,NaN,NaN,NaN,NaN,AM15G+Rsh
+RBSF-GaP,6500K_1000lx,1,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+RBSF-GaP,6500K_1000lx,0.46,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+RHJ,AM1.5G,1,0,Inf,NaN,NaN,NaN,NaN,AM15G
+RHJ,AM1.5G,0.46,0,Inf,NaN,NaN,NaN,NaN,AM15G
+RHJ,AM1.5G,0.46,0,631,NaN,NaN,NaN,NaN,AM15G+Rsh
+RHJ,6500K_1000lx,1,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.
+RHJ,6500K_1000lx,0.46,0,Inf,NaN,NaN,NaN,NaN,ERR Index exceeds the number of array elements. Index must not exceed 0.

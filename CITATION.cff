@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "GaAsPN QFP drift-diffusion solver: publication snapshot"
+version: 1.0.0
+license: BSD-3-Clause
+type: software
+authors:
+  - family-names: "Kızıloğlu"
+    given-names: "Volkan"
+repository-code: "https://example.invalid/REPLACE-WITH-REPOSITORY-URL"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.0000000"
+    description: "PLACEHOLDER: replace with the archive DOI after deposition"
+keywords:
+  - drift-diffusion
+  - quasi-Fermi potential
+  - Scharfetter-Gummel
+  - GaAsPN
+  - dilute nitride
+  - indoor photovoltaics
+  - MATLAB
+abstract: >-
+  MATLAB implementation of a one-dimensional quasi-Fermi-potential drift-diffusion solver
+  (Scharfetter-Gummel discretization, Gummel-alternating block Newton iteration with analytic
+  Jacobians) and the scripts that produce the results, figures and tables of the paper comparing
+  GaAsPN homojunction, front-heterojunction, GaP rear-surface-field, rear-heterojunction and
+  p-i-n solar-cell architectures under AM1.5G and indoor illumination.

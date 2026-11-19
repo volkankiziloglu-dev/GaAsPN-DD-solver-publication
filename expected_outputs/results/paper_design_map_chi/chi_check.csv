@@ -1,0 +1,11 @@
+Condition,map,n,agree,predicted_RHJ_ahead,observed_RHJ_ahead,max_margin_disagreeing,chi_of_disagreeing,samples_disagreeing
+AM1.5G,nominal chi 3.8,60,57.000,31.000,28,0.492,4.27 4.27 4.29,1 20 38
+AM1.5G,chi-aware,60,59.000,29.000,28,0.329,4.27,1
+AM1.5G,"observed, all",60,,,28,,,
+AM1.5G,"observed, type-I chi<=4.0",30,,,17,,,
+AM1.5G,"observed, type-II chi>4.0",30,,,11,,,
+6500K_1000lx,nominal chi 3.8,60,57.000,32.000,29,1.710,4.27 4.27 4.29,1 20 38
+6500K_1000lx,chi-aware,60,60.000,29.000,29,0.000,,
+6500K_1000lx,"observed, all",60,,,29,,,
+6500K_1000lx,"observed, type-I chi<=4.0",30,,,18,,,
+6500K_1000lx,"observed, type-II chi>4.0",30,,,11,,,

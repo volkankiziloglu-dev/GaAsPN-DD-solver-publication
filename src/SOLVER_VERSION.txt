@@ -1,0 +1,2 @@
+dd_solver v1.1.2
+snapshot of the shared solver library (synced 2026-11-13); publication subset selected by dependency analysis

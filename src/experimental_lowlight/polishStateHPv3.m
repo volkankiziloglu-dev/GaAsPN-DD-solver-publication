@@ -1,0 +1,74 @@
+function [out, info] = polishStateHPv3(dev, r, V, Gprofile, kind, opts)
+%POLISHSTATEHPV3 DENEYSEL (v3: bayrak, SAKLANAN durumdan hesaplanan Newton duzeltmesinden; baslangic ve toplam duzeltme kosullari) karisik-hassasiyetli Newton cilalamasi.
+% Yakinsamis bir gummelSolveQFPAnalytic(X) cikisindan (r) baslar; durumu hi+lo iki parcali tutar,
+% artigi assembleResidualQFPHP(kind) ile (genisletilmis hassasiyet) hesaplar, duzeltmeyi uretimin
+% analitik blok Jacobian'lari (double) ile cozer ve lo parcasina ekler. Blok Gauss-Seidel
+% (psi, phin, phip) supurmeleri; artik normu artik dusmuyorsa durur.
+% opts.maxSweeps (6), opts.nDigits (40). maxSweeps=0 -> yalniz HP degerlendirme (cilalamasiz).
+if nargin < 6, opts = struct(); end
+if ~isfield(opts,'maxSweeps'), opts.maxSweeps = 6; end
+if ~isfield(opts,'nDigits'), opts.nDigits = 40; end
+if ~isfield(opts,'convFlag'), opts.convFlag = 'polish'; end   % 'polish' | 'inherit'
+if ~isfield(opts,'stepTol'), opts.stepTol = 1e-12; end
+if ~isfield(opts,'maxCorr'), opts.maxCorr = 0.1; end   % [V] toplam duzeltme siniri (dal atlamasi korumasi)
+c = constants(); N = dev.N;
+S = struct('psi',r.psi,'psiLo',zeros(N,1),'phin',r.phin,'phinLo',zeros(N,1),'phip',r.phip,'phipLo',zeros(N,1));
+res = @(SS) assembleResidualQFPHP(dev, SS, V, Gprofile, kind, opts.nDigits);
+F = res(S);
+nrm = @(FF) [norm(FF(2:3:end)), norm(FF(3:3:end))];
+hist = nrm(F); best = S; bestN = sum(hist); bestIdx = 0;   % bestIdx: saklanan durumu ureten supurme (0 = baslangic)
+names = {'psi','phin','phip'};
+stepHist = [];
+for sweep = 1:opts.maxSweeps
+  sweepStep = 0;
+  for blk = 1:3
+    Sd = S; % Jacobian at rounded state
+    psiC = S.psi + S.psiLo; phinC = S.phin + S.phinLo; phipC = S.phip + S.phipLo;
+    switch blk
+      case 1, J = assemblePsiJacobianAnalyticQFP(dev, psiC, phinC, phipC);
+      case 2, J = assemblePhinJacobianAnalyticQFP(dev, psiC, phinC, phipC, V, zeros(N,1));
+      case 3, J = assemblePhipJacobianAnalyticQFP(dev, psiC, phinC, phipC, V, zeros(N,1));
+    end
+    Fb = F(blk:3:end);
+    rowNorm = full(max(abs(J),[],2)); good = isfinite(rowNorm) & rowNorm > 0;
+    floorNorm = max(min(rowNorm(good))*1e-12, realmin); sc = 1./max(rowNorm, floorNorm);
+    delta = (spdiags(sc,0,N,N)*J) \ (-(sc.*Fb));
+    if ~all(isfinite(delta)), sweepStep = Inf; continue; end
+    sweepStep = max(sweepStep, max(abs(delta)));
+    hi = Sd.(names{blk}); lo = Sd.([names{blk} 'Lo']) + delta;
+    t = hi + lo; lo = lo - (t - hi); hi = t;          % yeniden normalize (fast two-sum)
+    S.(names{blk}) = hi; S.([names{blk} 'Lo']) = lo;
+    F = res(S);
+  end
+  hn = nrm(F); hist(end+1,:) = hn; stepHist(end+1) = sweepStep; %#ok<AGROW>
+  if all(isfinite(hn)) && sum(hn) < bestN
+    best = S; bestN = sum(hn); bestIdx = sweep;
+  elseif sweep > 1
+    break;
+  end
+end
+S = best;
+[F, n, p, JnSeg, JpSeg] = res(S);
+psi = S.psi + S.psiLo; phin = S.phin + S.phinLo; phip = S.phip + S.phipLo;
+JtotSeg = ifaceCorrectTotalCurrent(dev, JnSeg + JpSeg, n, p);
+idxP = 2:N-1;
+chargeScale = c.Q * max([max(dev.Nd(idxP)), max(dev.Na(idxP)), max(n(idxP)), max(p(idxP)), 1e10]);
+out = r;
+out.psi = psi; out.phin = phin; out.phip = phip; out.n = n; out.p = p;
+out.JnSeg = JnSeg; out.JpSeg = JpSeg; out.Jseg = JtotSeg; out.J = median(JtotSeg);
+out.isFinite = r.isFinite && all(isfinite(F)) && all(isfinite(n)) && all(isfinite(p));
+out.poissonResidual = max(abs(F(3*(idxP-1)+1))) / chargeScale;
+out.poissonConverged = out.poissonResidual < 1e-6;
+out.currentConservation = checkCurrentConservation(JtotSeg, out.J, 1e-7, 1e-3);
+out.continuityResiduals = checkContinuityResiduals(dev, Gprofile, n, p, JnSeg, JpSeg, psi);
+% v3 bayragi: saklanan durumdan HESAPLANAN duzeltme (bir sonraki supurmenin adimi; yoksa bu duruma giren adim).
+if numel(stepHist) > bestIdx, certStep = stepHist(bestIdx+1); elseif bestIdx > 0, certStep = stepHist(bestIdx); else, certStep = Inf; end
+totalCorr = max([max(abs(psi-r.psi)), max(abs(phin-r.phin)), max(abs(phip-r.phip))]);
+startOK = r.isFinite && isfield(r,'poissonConverged') && r.poissonConverged;
+polishConverged = certStep < opts.stepTol;
+if strcmp(opts.convFlag,'inherit'), out.numericalConverged = r.numericalConverged && out.isFinite;
+else, out.numericalConverged = polishConverged && startOK && totalCorr < opts.maxCorr && out.isFinite; end
+info = struct('normHistory',hist,'stepHistory',stepHist,'polishConverged',polishConverged,'inheritedConverged',r.numericalConverged,'sweeps',size(hist,1)-1, ...
+  'certStep',certStep,'bestIdx',bestIdx,'totalCorr',totalCorr,'startOK',startOK,'v2Converged',~isempty(stepHist) && min(stepHist) < opts.stepTol, ...
+  'lo',struct('psi',S.psiLo,'phin',S.phinLo,'phip',S.phipLo));
+end

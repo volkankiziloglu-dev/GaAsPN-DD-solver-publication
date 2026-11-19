@@ -1,0 +1,3 @@
+Condition,n,agree,predicted_RHJ_ahead,observed_RHJ_ahead,max_margin_disagreeing
+AM1.5G,60,57,31,28,0.4916036270574011
+6500K_1000lx,60,57,32,29,1.7100443837192998

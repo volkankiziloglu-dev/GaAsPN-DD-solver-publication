@@ -1,0 +1,26 @@
+group,material_or_scope,parameter,symbol,value,unit,status,source_or_basis,required_action
+material,GaP,band gap,Eg,2.26,eV,literature-guided,Ioffe/handbook compilation,verify exact primary citation
+material,GaP,electron affinity,chi,3.8,eV,literature-guided nominal/surface-sensitive,reported range 3.7-4.3 eV,"paired grid 3.7;3.8;4.0;4.1;4.3 required"
+material,GaP,relative permittivity,epsr,11.1,1,literature-guided,Ioffe/handbook compilation,verify exact primary citation
+material,GaP,effective conduction DOS,Nc,1.8e19,cm^-3,literature-guided,Ioffe/handbook compilation,verify exact primary citation
+material,GaP,effective valence DOS,Nv,1.9e19,cm^-3,literature-guided,Ioffe/handbook compilation,verify exact primary citation
+material,GaP,electron mobility,mu_n,100,cm^2 V^-1 s^-1,literature-guided/selected,heavy-doping estimate,uncertainty required
+material,GaP,hole mobility,mu_p,80,cm^2 V^-1 s^-1,literature-guided/selected,heavy-doping estimate,uncertainty required
+material,GaP,SRH lifetime,tau,1e-9,s,legacy nominal,historical GaP device/decay data span about 1e-12-1e-8 s,"use 1e-10 sensitivity anchor and log grid 1e-12;1e-11;1e-10;1e-9;1e-8"
+material,GaAsPN 3% N,band gap,Eg,1.8565,eV,model-derived,implemented BAC relation,cross-check against independent band-gap model
+material,GaAsPN 3% N,electron affinity,chi,4.0,eV,assumed,no composition-matched measurement,paired sensitivity required
+material,GaAsPN 3% N,relative permittivity,epsr,12.9,1,assumed/proxy,III-V nominal proxy,source or sensitivity required
+material,GaAsPN 3% N,effective conduction DOS,Nc,1e19,cm^-3,assumed,no composition-matched measurement,paired sensitivity required
+material,GaAsPN 3% N,effective valence DOS,Nv,1e19,cm^-3,assumed,no composition-matched measurement,paired sensitivity required
+material,GaAsPN 3% N,electron mobility,mu_n,500,cm^2 V^-1 s^-1,assumed,no bulk GaAsPN measurement located,high-priority sensitivity required
+material,GaAsPN 3% N,hole mobility,mu_p,112,cm^2 V^-1 s^-1,literature-derived,Ilahi et al.,confirm composition and processing match
+material,GaAsPN 3% N,SRH lifetime,tau,6e-7,s,literature-derived,Ilahi et al.,processing-dependent uncertainty required
+material,GaPN 2.1% N,band gap,Eg,1.95,eV,experimental anchor,Ben Saddik et al. 2024,retain uncertainty
+material,GaPN 2.1% N,electron affinity,chi,4.10,eV,assumed,no direct measurement,paired sensitivity required
+material,GaPN 2.1% N,eps/Nc/Nv/mobility/lifetime,multiple,GaP values,various,borrowed,GaP proxy values,no superiority claim without sensitivity
+recombination,GaAsPN / GaP / GaPN,radiative coefficient,B_rad,4.277e-12 / 1.937e-13 / 9.903e-11,cm^3 s^-1,computed,van Roosbroeck-Shockley integral from optical constants (GaAsPN theoretical),enabled in the production runners (buildPaperArchitecture default is 0)
+recombination,all Stage-A materials,Auger coefficients,Cn/Cp,3e-30,cm^6 s^-1,proxy,transferred from the Klitzke et al. GaInP model,enabled in the production runners (buildPaperArchitecture default is 0); sensitivity in the recombination-mechanism test
+interface,physical heterointerfaces,electron and hole IRV,Sn/Sp,8910,cm s^-1,literature-derived,Ilahi et al.,verify applicability to each material pair
+surface,rear boundary,surface recombination velocity,Sback,1e5,cm s^-1,assumed,common controlled baseline,sensitivity required
+numerical,all architectures,temperature,T,300,K,fixed,canonical constants,none
+numerical,all architectures,voltage step,dV,0.02,V,nominal,Stage-A runner,0.01 V convergence required

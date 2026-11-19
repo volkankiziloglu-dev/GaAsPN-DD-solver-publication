@@ -1,0 +1,9 @@
+Condition,chi_prior,P_RHJ_ahead
+AM1.5G,"uniform [3.7, 4.3] (sampling prior)",0.498
+AM1.5G,"uniform [3.7, 4.0] (type I)",0.5347
+AM1.5G,fixed 3.8 (nominal),0.5351
+AM1.5G,"uniform [4.0, 4.3] (type II)",0.4616
+6500K_1000lx,"uniform [3.7, 4.3] (sampling prior)",0.5449
+6500K_1000lx,"uniform [3.7, 4.0] (type I)",0.5818
+6500K_1000lx,fixed 3.8 (nominal),0.5803
+6500K_1000lx,"uniform [4.0, 4.3] (type II)",0.5079

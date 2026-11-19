@@ -1,0 +1,79 @@
+function T = run_paper_uncertainty_sampling_ns(iStart, iEnd, tag)
+%RUN_PAPER_UNCERTAINTY_SAMPLING_NS Paired sampling in the nanosecond-lifetime regime (referee check).
+% Same design as run_paper_uncertainty_sampling.m (Latin hypercube, fixed seed, every sample applied to HJ-0, F-HJ, RBSF-GaP, RHJ, AM1.5G and
+% CIE 6500 K / 1000 lx, production sweeps and acceptance gates), but with a lifetime range covering device-effective values and two extra
+% dimensions that decide the ranking (results of cases/run_paper_referee_checks.m):
+%   tauP     p-type GaAsPN SRH lifetime, log-uniform [1, 100] ns          (HJ-0, F-HJ, RBSF-GaP; the n-type emitter of HJ-0 shares it)
+%   ratio    n-/p-type lifetime ratio r, log-uniform [1, 30]              (RHJ n-type absorber lifetime = r * tauP)
+%   Sback    rear-contact velocity, log-uniform [1e3, 1e5] cm/s           (all architectures)
+%   Sint, Nabs, chiGaP, tauGaP, muN: as in the main sampling (log-uniform [1e3,1e5]; [3e16,3e17]; uniform [3.7,4.3]; [1e-11,1e-8]; [250,1000]).
+% The design for all 60 samples is generated with seed 20261104 regardless of iStart/iEnd, so parallel workers use disjoint slices of one design.
+% Output: results/paper_uncertainty_ns/ns_samples_<tag>.csv (checkpointed after every sample).
+if nargin < 1, iStart = 1; end
+if nargin < 2, iEnd = 60; end
+if nargin < 3, tag = sprintf('%02d_%02d',iStart,iEnd); end
+nSamples = 60;
+assertCanonicalPath(); amMode = strcmp(getenv('AM_UNIFIED'),'1'); icdRun = 2 - amMode; amSuffix = ''; if amMode, amSuffix = '_am'; end   % AM_UNIFIED=1: rerun AM1.5G with all finite points (unified extractor)
+warning('off','MATLAB:nearlySingularMatrix'); warning('off','MATLAB:singularMatrix');
+root = fileparts(fileparts(mfilename('fullpath'))); outDir = fullfile(root,'results',['paper_uncertainty_ns_unified' amSuffix]); if ~isfolder(outDir), mkdir(outDir); end
+arc = load(fullfile(root,'results','paper_stageA','stageA_comparison.mat'),'d1nm','d2nm');
+arcFn = @(lam) tmmReflectance(lam,[1.0,1.38,2.35,gapRefractiveIndexReal(lam)],[arc.d1nm,arc.d2nm]);
+Bmat = paperRadiativeCoefficients(300);
+codes = ["HJ-0","F-HJ","RBSF-GaP","RHJ"];
+conds = {'AM1.5G'; '6500K_1000lx'};
+specs = {loadRealAM15G(); buildCIEIndoorSpectrum('6500K',1000)};
+Vgrids = {(0:0.02:1.70)'; (0:0.02:1.56)'};
+Pins = cellfun(@spectrumPower,specs);
+
+rng(20261104,'twister'); d = 8; U = zeros(nSamples,d);
+for j = 1:d, U(:,j) = (randperm(nSamples)' - rand(nSamples,1))/nSamples; end
+lg = @(u,a,b) 10.^(log10(a) + u*(log10(b)-log10(a)));
+P = table(lg(U(:,1),1e-9,1e-7), lg(U(:,2),1,30), lg(U(:,3),1e3,1e5), lg(U(:,4),1e3,1e5), lg(U(:,5),3e16,3e17), 3.7+0.6*U(:,6), lg(U(:,7),1e-11,1e-8), lg(U(:,8),250,1000), ...
+  'VariableNames',{'tauP','ratio','Sback','Sint','Nabs','chiGaP','tauGaP','muN'});
+
+ck = fullfile(outDir,sprintf('ns_samples_%s.csv',tag)); rows = {};
+for is = iStart:iEnd
+  t0 = tic;
+  for icd = icdRun   % indoor only (AM1.5G unchanged); unified extractor
+    spec = specs{icd}; Vgrid = Vgrids{icd}; Pin = Pins(icd);
+    for ia = 1:numel(codes)
+      tauAbs = P.tauP(is); if codes(ia) == "RHJ", tauAbs = P.tauP(is)*P.ratio(is); end
+      try
+        dev = buildPaperArchitecture(char(codes(ia)), 'AbsorberDoping',P.Nabs(is), 'AbsorberTau_s',tauAbs, 'AbsorberMuN',P.muN(is), ...
+          'frontIRV',P.Sint(is), 'rearIRV',P.Sint(is), 'Sback',P.Sback(is), 'GaPChi_eV',P.chiGaP(is), 'GaPTau_s',P.tauGaP(is), ...
+          'BradAbs',Bmat.GaAsPN_cm3ps, 'BradGaP',Bmat.GaP_cm3ps, 'BradGaNP',Bmat.GaPN_Ege18_cm3ps, ...
+          'CnAugerAbs',3e-30,'CpAugerAbs',3e-30,'CnAugerGaP',3e-30,'CpAugerGaP',3e-30,'CnAugerGaNP',3e-30,'CpAugerGaNP',3e-30);
+        G = deviceGenAndTransmitML(dev,spec,arcFn);
+        if icd == 1
+          [~,~,m] = runAcceptedJVSweep(dev,G,Vgrid,Pin,true); cls = 'AM15G';
+          Jsc = m.Jsc*1e3; Voc = m.Voc*1e3; FF = m.FF*100; PCE = m.PCE;
+        else
+          [~,gate] = indoorSweepLocal(dev,G,Vgrid,Pin); cls = char(gate.curveClass);
+          Jsc = gate.Jsc*1e6; Voc = gate.Voc*1e3; FF = gate.FF*100; PCE = gate.PCE;
+        end
+      catch ME
+        Jsc = NaN; Voc = NaN; FF = NaN; PCE = NaN; cls = ['ERR ' strrep(ME.message,',',';')];
+      end
+      rows(end+1,:) = {is, P.tauP(is), P.ratio(is), P.Sback(is), P.Sint(is), P.Nabs(is), P.chiGaP(is), P.tauGaP(is), P.muN(is), conds{icd}, char(codes(ia)), tauAbs, Jsc, Voc, FF, PCE, cls}; %#ok<AGROW>
+    end
+  end
+  T = cell2table(rows,'VariableNames',{'Sample','tauP','ratio','Sback','Sint','Nabs','chiGaP','tauGaP','muN','Condition','Architecture','tauAbs','Jsc','Voc_mV','FF_pct','PCE_pct','Class'});
+  writetable(T,ck);
+  fprintf('sample %d done in %.1f s\n', is, toc(t0));
+end
+end
+
+function [curve,gate] = indoorSweepLocal(dev,G,Vgrid,Pin)
+N = dev.N; idxStart = find(abs(Vgrid-0.02)<1e-12,1);
+r002 = gummelSolveQFPAnalytic(dev,0.02,G,struct('psiInit',dev.psiEq,'phinInit',zeros(N,1),'phipInit',zeros(N,1)));
+prev = r002;
+for v = [0.01,0.005,0], r0 = gummelSolveQFPAnalytic(dev,v,G,struct('psiInit',prev.psi,'phinInit',prev.phin,'phipInit',prev.phip)); prev = r0; end
+states = repmat(r002,numel(Vgrid),1); states(1) = r0; states(idxStart) = r002; prev = r002;
+for k = idxStart+1:numel(Vgrid)
+  rk = gummelSolveQFPAnalytic(dev,Vgrid(k),G,struct('psiInit',prev.psi,'phinInit',prev.phin,'phipInit',prev.phip));
+  states(k) = rk; if rk.isFinite, prev = rk; end
+end
+gate = indoorAcceptanceGate(dev,G,Vgrid,states,Pin); curve = gate.Jterm;
+fU = gate.isFinite(:); mU = pvMetrics([gate.Vs(fU), gate.Jterm(fU)],Pin);   % unified extractor: all finite points, J_sc at 0 V, linear V_oc, parabolic MPP
+gate.Jsc = mU.Jsc; gate.Voc = mU.Voc; gate.FF = mU.FF; gate.PCE = mU.PCE;
+end
