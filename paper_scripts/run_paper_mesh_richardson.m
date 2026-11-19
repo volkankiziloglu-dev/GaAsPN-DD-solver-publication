@@ -1,10 +1,10 @@
 function T = run_paper_mesh_richardson(code, scales, tauNs, outName)
-%RUN_PAPER_MESH_RICHARDSON Three-level mesh study (1x, 2x, 4x nodes) for one architecture, AM1.5G and CIE 6500 K / 1000 lx (referee check).
+%RUN_PAPER_MESH_RICHARDSON Three-level mesh study (1x, 2x, 4x nodes) for one architecture, AM1.5G and CIE 6500 K / 1000 lx.
 % Production setup (Stage-A ARC, SRH + radiative + Auger, 0.02 V grid). The full J-V curves are saved (all finite points and the gate flag), so that the terminal
 % metrics can be extracted offline with one common extractor (cases/analyze_mesh_richardson.py).
 % Output: results/paper_mesh_richardson/<code>_x<scale>_<cond>.csv and mesh_richardson_<code>.csv (class and timing).
 if nargin < 2, scales = [1 2 4]; end
-if nargin < 3, tauNs = 600; end   % absorber lifetime (ns; RHJ r = 1); round-4 review R1-4: 1 and 10 ns in addition to the nominal 600 ns
+if nargin < 3, tauNs = 600; end   % absorber lifetime (ns; RHJ r = 1); 1 and 10 ns in addition to the nominal 600 ns
 sfx = ''; if tauNs ~= 600, sfx = sprintf('_tau%g',tauNs); end
 assertCanonicalPath(); warning('off','all');
 root = fileparts(fileparts(mfilename('fullpath'))); if nargin < 4 || isempty(outName), outName = 'paper_mesh_richardson'; end   % e.g. paper_mesh_richardson_expm1 (re-run after the sgBernoulli fix)

@@ -1,5 +1,5 @@
 function T = compute_sq_limits()
-%COMPUTE_SQ_LIMITS Detailed-balance (Shockley-Queisser type) limits for the bandgaps and spectra of the paper (referee check).
+%COMPUTE_SQ_LIMITS Detailed-balance (Shockley-Queisser type) limits for the bandgaps and spectra of the paper.
 % Step-function absorber (unit absorptance above Eg, none below), 300 K, radiative recombination only, emission into the front hemisphere only (ideal back
 % reflector), no reflection, no series/shunt resistance. Spectra: ASTM G173 AM1.5G, and the CIE LED/fluorescent distributions scaled to 1000 lx
 % (buildCIEIndoorSpectrum, same as the device calculations). Pin from the full spectrum, as for the device efficiencies.

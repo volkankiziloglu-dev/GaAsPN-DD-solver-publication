@@ -25,8 +25,8 @@ Pin = spectrumPower(am15);
 IRV = 8910;
 
 samples = { ...
-  struct('tag','1um',  't_i',1000e-7,'N_i',220,'ref','Voc=1180mV Jsc=2.8mA/cm2 FF=50%% eta=1.6%% (Numune 1)'), ...
-  struct('tag','0p3um','t_i',300e-7, 'N_i',80, 'ref','Voc=880mV  Jsc=3.8mA/cm2 FF=71%% eta=2.3%% (Numune 2)') ...
+  struct('tag','1um',  't_i',1000e-7,'N_i',220,'ref','Voc=1180mV Jsc=2.8mA/cm2 FF=50%% eta=1.6%% (Sample 1)'), ...
+  struct('tag','0p3um','t_i',300e-7, 'N_i',80, 'ref','Voc=880mV  Jsc=3.8mA/cm2 FF=71%% eta=2.3%% (Sample 2)') ...
 };
 
 for si = 1:numel(samples)
@@ -74,7 +74,7 @@ for si = 1:numel(samples)
   fprintf('Accepted %d / %d points (%d rejected), total %.1f min\n', size(pts,1), numel(Vs), nRejected, toc(tAll)/60);
   m = pvMetrics(pts, Pin);
   fprintf('da Silva %s: Jsc=%.4f mA/cm2 Voc=%.1f mV FF=%.2f%% eta=%.2f%%\n', s.tag, m.Jsc*1e3, m.Voc*1e3, m.FF*100, m.PCE);
-  fprintf('  Referans (real measured): %s\n\n', s.ref);
+  fprintf('  Reference (real measured): %s\n\n', s.ref);
 
   T = array2table(pts,'VariableNames',{'V','J_Acm2'});
   writetable(T, fullfile(resultsDir, sprintf('dasilva_pin_%s_qfp_jv.csv', s.tag)));

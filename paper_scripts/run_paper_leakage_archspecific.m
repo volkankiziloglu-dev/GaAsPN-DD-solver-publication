@@ -1,5 +1,5 @@
 function T = run_paper_leakage_archspecific()
-%RUN_PAPER_LEAKAGE_ARCHSPECIFIC Architecture-specific leakage test (referee check).
+%RUN_PAPER_LEAKAGE_ARCHSPECIFIC Architecture-specific leakage test.
 % The earlier test (run_paper_leakage_robustness.m) subtracted a branch fitted to the measured excess current of the Klitzke HOMOjunction from all four
 % architectures, although the excess current of the Klitzke RHJ behaves differently (sublinear in light, supplement, Table "additional current of the
 % lower-doped RHJ"). Here the HJ-type architectures (HJ-0, F-HJ, RBSF-GaP) receive the homojunction branch (J0p x0.5/x1/x2) and the RHJ receives the

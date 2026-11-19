@@ -1,39 +1,39 @@
 function dev = buildDeviceML(layers, absorberIdx, junctions, opts)
-% Genel N-katmanli cihaz kurucu. buildDevice.m'nin (common/, 2-bolgeli
-% ETL/Abs) genellestirilmis hali -- var olan dosyaya DOKUNMADAN, ayri bir
-% modul olarak. Ciktisi (dev struct) common/'daki solveElectronContinuity.m
-% ve solveHoleContinuity.m tarafindan DOGRUDAN kullanilabilir (ayni alan
-% adlari/formatlari), cunku bu iki dosya zaten herhangi bir bolge sayisina
-% genellenebilir sekilde (sadece per-node dizilerle) yazilmis.
+% General N-layer device builder. Generalized version of buildDevice.m (common/, 2-region
+% ETL/Abs) -- as a separate module, WITHOUT TOUCHING the existing
+% file. Its output (dev struct) can be used DIRECTLY by solveElectronContinuity.m
+% and solveHoleContinuity.m in common/ (same field
+% names/formats), because these two files are already written in a way that
+% generalizes to any number of regions (per-node arrays only).
 %
-% layers: struct dizisi, her biri:
-%   t (kalinlik, cm), N (izgara nokta sayisi), Eg, chi, eps, Nd, Na
-%   (katkilama, birindeki OPSIYONEL, varsayilan 0), muN, muP, tau, NcNv,
-%   Brad (OPSIYONEL, varsayilan 0), alphaMax, edgeWidth (OPSIYONEL,
-%   lojistik-kenar sogurma modeli icin; kullanilmazsa 0/0.05 varsayilan --
-%   yani o katman optik olarak SEFFAF), useOpticalTable (OPSIYONEL, true
-%   ise bu katman icin gercek n(E),k(E) tablosu kullanilir, opticalTable
-%   alaniyla birlikte -- bkz. loadGaAsNPOptical.m formatinda).
+% layers: struct array, each with:
+%   t (thickness, cm), N (number of grid points), Eg, chi, eps, Nd, Na
+%   (doping, OPTIONAL for either one, default 0), muN, muP, tau, NcNv,
+%   Brad (OPTIONAL, default 0), alphaMax, edgeWidth (OPTIONAL,
+%   for the logistic-edge absorption model; if unused, default 0/0.05 --
+%   i.e. that layer is optically TRANSPARENT), useOpticalTable (OPTIONAL, if true
+%   the real n(E),k(E) table is used for this layer, together with the opticalTable
+%   field -- see loadGaAsNPOptical.m for the format).
 %
-% absorberIdx: deltaEc/deltaEv=0 referansi olan katmanin indeksi (genelde
-%   ana absorber).
+% absorberIdx: index of the layer that is the deltaEc/deltaEv=0 reference (usually
+%   the main absorber).
 %
-% junctions: struct dizisi, uzunluk = numel(layers)-1, her biri Sn_int,
-%   Sp_int (OPSIYONEL, varsayilan 0/0 = ideal arayuz) icerir -- katman k
-%   ile k+1 arasindaki arayuzu tanimlar.
+% junctions: struct array, length = numel(layers)-1, each containing Sn_int,
+%   Sp_int (OPTIONAL, default 0/0 = ideal interface) -- defines the interface between
+%   layer k and k+1.
 %
-% NOT (Madde 9, dis inceleme -- BILEREK ERTELENDI): dx=t/(N-1) (ilk dugum
-% katman basinda, SON dugum TAM katman sonunda) once denendi, ama N-katmanli
-% zincirlemede xOffset her katmandan sonra TAM t kadar ilerledigi icin
-% katman k'nin SON dugumu ile katman k+1'in ILK dugumu AYNI x'te cakisiyor
-% -> h=0 -> eps/(h*hAvg)=Inf -> Newton/Thomas coker (bkz. Gorev #7 debug).
-% common/buildDevice.m ile BIREBIR ayni yapiyi (ve regresyonu) korumak icin
-% burada da dx = t/N kullaniliyor (eski kod ile ayni "bir hucre kisa kalma"
-% davranisi, ETL/Abs arasinda interfaceRecombination.m'nin ihtiyac duydugu
-% SIFIR-OLMAYAN iE/iA araligini da dogal olarak koruyor). Madde 9'un asil
-% duzeltmesi (N-katmanli ortak sinir dugumu tasarimi: hangi katmanin
-% ozelliklerini alacagi, R_int'in nasil bolunecegi) AYRI, dikkatli
-% tasarlanmasi gereken bir gorev olarak ERTELENDI.
+% NOTE (Item 9, external review -- DELIBERATELY DEFERRED): dx=t/(N-1) (first node
+% at the start of the layer, LAST node EXACTLY at the end of the layer) was tried first, but in N-layer
+% chaining, since xOffset advances by EXACTLY t after each layer,
+% the LAST node of layer k and the FIRST node of layer k+1 coincide at the SAME x
+% -> h=0 -> eps/(h*hAvg)=Inf -> Newton/Thomas breaks down (see Task #7 debug).
+% To preserve EXACTLY the same structure (and regression) as common/buildDevice.m,
+% dx = t/N is used here as well (the same "one cell short" behavior as the old code,
+% which also naturally preserves the NONZERO iE/iA gap between ETL/Abs that
+% interfaceRecombination.m needs). The proper fix of Item 9
+% (N-layer shared boundary node design: which layer's
+% properties it takes, how R_int is split) was DEFERRED as a separate task
+% that needs careful design.
 
 c = constants();
 NL = numel(layers);
@@ -90,16 +90,16 @@ srhTauN=Inf(Ntotal,nCenters); srhTauP=Inf(Ntotal,nCenters);
 srhN1=zeros(Ntotal,nCenters); srhP1=zeros(Ntotal,nCenters);
 
 xOffset = 0; node = 0;
-junctionNodes = zeros(1,NL-1); % katman k'nin SON dugumu (arayuz k, k ile k+1 arasinda)
+junctionNodes = zeros(1,NL-1); % LAST node of layer k (interface k, between k and k+1)
 layerStartNode = zeros(1,NL);
 layerEndNode = zeros(1,NL);
 for k = 1:NL
   Lk = layers(k);
   layerStartNode(k) = node+1;
   if Lk.N < 2
-    error('buildDeviceML: katman %d en az 2 dugum icermeli', k);
+    error('buildDeviceML: layer %d must contain at least 2 nodes', k);
   end
-  dx = Lk.t / Lk.N; % common/buildDevice.m ile ayni (bkz. yukaridaki not)
+  dx = Lk.t / Lk.N; % same as common/buildDevice.m (see note above)
   for j = 0:(Lk.N-1)
     node = node+1;
     x(node) = xOffset + j*dx;
@@ -153,20 +153,20 @@ psiOffsetP = chiRel + (Eg-EgAbs) - c.VT*log(Nv/NvAbs);
 deltaEc = -psiOffsetN;
 deltaEv = -psiOffsetP;
 
-% isAbs: eski 2-bolgeli kodla uyumluluk icin tutuluyor (solveElectronContinuity
-% vb. bu alani DOGRUDAN kullanmiyor -- sadece singleWavelengthGenML.m kullanir).
-% Burada TUM dugumler potansiyel olarak soguruyor sayilir (alphaMax=0 veya
-% useOpticalTable=false ise zaten katki sifir olur), coklu-katman optigi
-% icin isAbs tek bir "hangi bolge" ayrimindan bagimsizlastirildi.
+% isAbs: kept for compatibility with old 2-region code (solveElectronContinuity
+% etc. do NOT use this field DIRECTLY -- only singleWavelengthGenML.m uses it).
+% Here ALL nodes are considered potentially absorbing (if alphaMax=0 or
+% useOpticalTable=false the contribution is zero anyway); for multilayer optics
+% isAbs was made independent of a single "which region" distinction.
 isAbs = double(useTableArr | (alphaMaxArr > 0));
 
 Sn_int_arr = arrayfun(@(j) j.Sn_int, junctions);
 Sp_int_arr = arrayfun(@(j) j.Sp_int, junctions);
 
-% Tek bir arayuz varsa (2 katman), common/interfaceRecombination.m ile
-% GERIYE-UYUMLU tek-junction alanlarini da (N_ETL) dolduruyoruz --
-% common/ dosyalari degistirilmeden 2-katmanli ozel durumda AYNEN
-% calismasi icin (bkz. Gorev #7 regresyon dogrulamasi).
+% If there is a single interface (2 layers), we also fill the BACKWARD-COMPATIBLE
+% single-junction fields (N_ETL) used by common/interfaceRecombination.m --
+% so that common/ files work UNCHANGED in the 2-layer special case
+% without modification (see Task #7 regression validation).
 dev = struct('N',Ntotal,'x',x,'h',h,'eps',eps_,'Eg',Eg,'Nd',Nd,'Na',Na, ...
   'muN',muN,'muP',muP,'tau',tau,'isAbs',isAbs,'ni',ni,'chi',chi, ...
   'Nc',Nc,'Nv',Nv,'chiRef',chiAbs,'EgRef',EgAbs, ...
@@ -181,7 +181,7 @@ dev = struct('N',Ntotal,'x',x,'h',h,'eps',eps_,'Eg',Eg,'Nd',Nd,'Na',Na, ...
   'absorberIdx',absorberIdx,'Sback',opts.Sback);
 
 if NL >= 2
-  dev.N_ETL = junctionNodes(1); % common/interfaceRecombination.m ile geriye-uyumluluk (ilk arayuz)
+  dev.N_ETL = junctionNodes(1); % backward compatibility with common/interfaceRecombination.m (first interface)
   dev.Sn_int = Sn_int_arr(1);
   dev.Sp_int = Sp_int_arr(1);
 else

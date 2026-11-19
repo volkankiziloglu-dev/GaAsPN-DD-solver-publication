@@ -1,5 +1,5 @@
 function T = run_dasilva_tau_scan()
-%RUN_DASILVA_TAU_SCAN Can a shorter absorber lifetime alone explain the low J_sc of the measured da Silva GaAsPN p-i-n cells (2.8 and 3.8 mA/cm2)? (referee check R2-5)
+%RUN_DASILVA_TAU_SCAN Can a shorter absorber lifetime alone explain the low J_sc of the measured da Silva GaAsPN p-i-n cells (2.8 and 3.8 mA/cm2)?
 % The p-i-n stack of run_dasilva_pin_qfp.m is solved at V = 0 under AM1.5G for i-region lifetimes from 1e-11 to 6e-7 s (single midgap centre, nominal mobilities).
 % Output: results/paper_calibrated_regime/dasilva_tau_scan.csv
 assertCanonicalPath(); warning('off','all');

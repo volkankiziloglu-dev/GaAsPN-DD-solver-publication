@@ -1,10 +1,10 @@
 function T = run_paper_r4_analyses(part, iSlice, nSlice)
-%RUN_PAPER_R4_ANALYSES Analyses requested by the fourth simulated review (docs/HAKEM_SIMULASYONU_2026-11-07.md, roadmap group B).
-% part 'L200': design map and rear-contact controls at CIE 6500 K / 200 lx (R3-1): for tau_p = 1-600 ns, RBSF-GaP and RHJ (r = 1-60) at
+%RUN_PAPER_R4_ANALYSES Group-B robustness analyses.
+% part 'L200': design map and rear-contact controls at CIE 6500 K / 200 lx: for tau_p = 1-600 ns, RBSF-GaP and RHJ (r = 1-60) at
 %              S_back = 1e5 cm/s, and HJ-0, HJ-U, F-HJ, RBSF-GaP at S_back = 1e5 and 1e3 cm/s (r = 1).
-% part 'OPT' : per-architecture thickness/doping grid in the nanosecond regime (R2-7, R5-C3): tau = 1 and 10 ns (RHJ r = 1), S_back = 1e5,
+% part 'OPT' : per-architecture thickness/doping grid in the nanosecond regime: tau = 1 and 10 ns (RHJ r = 1), S_back = 1e5,
 %              absorber thickness scale 0.25-1.5 (nominal 1.5 um) x absorber doping 1e16-1e18 cm-3, HJ-0, HJ-U, F-HJ, RBSF-GaP, RHJ, AM1.5G and 1000 lx.
-% part 'SRH' : injection-dependent SRH (R2-4): the SAME single SRH centre (tau_n0, tau_p0, E_t - E_i) in the p-type (RBSF-GaP) and the
+% part 'SRH' : injection-dependent SRH: the SAME single SRH centre (tau_n0, tau_p0, E_t - E_i) in the p-type (RBSF-GaP) and the
 %              n-type (RHJ) absorber instead of a constant lifetime ratio; tau pairs (ns) (10,10) (10,100) (100,10) (1,10) (10,1), E_t - E_i =
 %              -0.3, 0, +0.3 eV; AM1.5G, 1000 and 200 lx. The design-map ratio is r = tau_p0/tau_n0 at tau_p = tau_n0.
 % part 'SRH2': ratio scan r = tau_p0/tau_n0 = 2-30 at tau_n0 = 10 and 100 ns (E_t = E_i) and shallow levels E_t - E_i = +-0.8 eV at r = 10.
@@ -68,7 +68,7 @@ switch part
         for c = {'RBSF-GaP','RHJ'}, for ic = 1:3, J(end+1,:) = {c{1},tn,10,1e5,1,1e17,ic,[tn tn*10 Et]}; end, end %#ok<AGROW>
       end
     end
-  case 'DIM'    % round-5 review (R5-M2): design map at absorber thickness scale 0.5 and 1.5 (W = 0.75 and 2.25 um), mu_n = 500,
+  case 'DIM'    % design map at absorber thickness scale 0.5 and 1.5 (W = 0.75 and 2.25 um), mu_n = 500,
                 % for a thickness-normalised (L/W) crossover criterion; RBSF-GaP (tau = tau_p) and RHJ (tau = r*tau_p), S_back = 1e5
     for ts = [0.5 1.5]
       for tp = [1 3 10 30 100 600]
@@ -78,7 +78,7 @@ switch part
         end
       end
     end
-  case 'BERN'   % re-run of a subset of OPT (nominal thickness/doping) and L200 jobs after the expm1 fix of sgBernoulli (round-5 review)
+  case 'BERN'   % re-run of a subset of OPT (nominal thickness/doping) and L200 jobs after the expm1 fix of sgBernoulli
     for tp = [1 10]
       for c = {'HJ-0','HJ-U','F-HJ','RBSF-GaP','RHJ'}, for ic = 1:2, J(end+1,:) = {c{1},tp,1,1e5,1,1e17,ic}; end, end %#ok<AGROW>
     end

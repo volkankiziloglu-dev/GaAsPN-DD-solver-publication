@@ -33,20 +33,20 @@ arguments
   opts.AbsorberMuN (1,1) double {mustBePositive} = 500        % GaAsPN electron mobility (assumed nominal), cm2/Vs
   opts.HomoRearContactNa (1,1) double {mustBePositive} = 1e19
   opts.HomoRearContactNodes (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(opts.HomoRearContactNodes,2)} = 20
-  opts.AbsorberOpticalShift_eV (1,1) double = 0     % rigid shift of the GaAsPN optical table in energy (referee check; 0 = frozen production)
-  opts.AbsorberSRHCenters = []                      % struct array (tauN,tauP,EtRelEi_eV) of SRH centres of the GaAsPN absorber layers (referee check, MD421-calibrated regime); [] = single centre with opts.AbsorberTau_s (frozen production)
-  opts.AbsorberEgShift_eV (1,1) double = 0          % shift of the GaAsPN electrical bandgap (referee check; use together with AbsorberOpticalShift_eV and a consistent BradAbs; 0 = frozen production)
+  opts.AbsorberOpticalShift_eV (1,1) double = 0     % rigid shift of the GaAsPN optical table in energy (robustness check; 0 = frozen production)
+  opts.AbsorberSRHCenters = []                      % struct array (tauN,tauP,EtRelEi_eV) of SRH centres of the GaAsPN absorber layers (robustness check, MD421-calibrated regime); [] = single centre with opts.AbsorberTau_s (frozen production)
+  opts.AbsorberEgShift_eV (1,1) double = 0          % shift of the GaAsPN electrical bandgap (robustness check; use together with AbsorberOpticalShift_eV and a consistent BradAbs; 0 = frozen production)
   opts.AbsorberEgShiftInCB (1,1) logical = true      % true: the Eg shift is taken in the conduction band (chi_abs = 4.0 - shift, valence band fixed); false: chi fixed (valence band moves)
-  opts.AbsorberThicknessScale (1,1) double {mustBePositive} = 1   % scales every GaAsPN absorber/base thickness and its node count (referee check; 1 = frozen production)
+  opts.AbsorberThicknessScale (1,1) double {mustBePositive} = 1   % scales every GaAsPN absorber/base thickness and its node count (robustness check; 1 = frozen production)
   opts.PinBackground (1,1) double = 1e15   % PIN only: background doping of the unintentionally doped GaAsPN i-layer, cm-3 (>0 n-type, <0 p-type)
-  opts.InterfaceSlabNodes (1,1) double {mustBeInteger,mustBeNonnegative} = 0   % referee check R1-2: >0 splits a slab of InterfaceSlab_nm off each side of every heterointerface and meshes it with this many nodes (0 = frozen production mesh)
+  opts.InterfaceSlabNodes (1,1) double {mustBeInteger,mustBeNonnegative} = 0   % >0 splits a slab of InterfaceSlab_nm off each side of every heterointerface and meshes it with this many nodes (0 = frozen production mesh)
   opts.InterfaceSlab_nm (1,1) double {mustBePositive} = 5
-  opts.AbsorberEps (1,1) double {mustBePositive} = 12.9   % GaAsPN relative permittivity (round-5 review: Vegard ~11.1; 12.9 = frozen production)
+  opts.AbsorberEps (1,1) double {mustBePositive} = 12.9   % GaAsPN relative permittivity (Vegard ~11.1; 12.9 = frozen production)
   opts.AbsorberNc (1,1) double {mustBePositive} = 1e19    % GaAsPN effective densities of states (assumption; frozen production 1e19/1e19)
   opts.AbsorberNv (1,1) double {mustBePositive} = 1e19
-  opts.BGN_eV (1,1) double {mustBeNonnegative} = 0        % round-6 check: band-gap narrowing of heavily doped layers (0 = frozen production)
+  opts.BGN_eV (1,1) double {mustBeNonnegative} = 0        % robustness check: band-gap narrowing of heavily doped layers (0 = frozen production)
   opts.BGNThreshold (1,1) double {mustBePositive} = 1e18  % doping above which BGN_eV is applied
-  opts.IntRecLowGap (1,1) logical = false                 % round-6 check: interface recombination with lower-gap-side densities (false = geometric mean, production)
+  opts.IntRecLowGap (1,1) logical = false                 % robustness check: interface recombination with lower-gap-side densities (false = geometric mean, production)
   opts.AbsorberNFraction (1,1) double {mustBePositive} = 0.03   % nitrogen fraction of the Si-matched GaAsPN absorber (composition check; 0.03 = frozen production). Eg from BAC; the gap change relative to 3% N is taken in the conduction band (chi_abs = 4.0 - dEg)
   opts.AbsorberOpticalN (1,1) double {mustBePositive} = 3.0     % percent N of the Zou-Goodnick n,k table (2.5,3,...,5; 3.0 = frozen production)
 end
@@ -161,7 +161,7 @@ switch code
     % n+-GaP / i-GaAsPN / p+-GaP double heterostructure (the structure of the
     % grown GaAsPN cells): the RBSF-GaP stack with the absorber doping replaced
     % by a low background, so that the field of the n+/p+ pair extends over the
-    % i-layer (referee check R2-4 / R5-M2).
+    % i-layer.
     NdI = max(opts.PinBackground,0); NaI = max(-opts.PinBackground,0);
     [layers,layerNames] = appendLayer(layers,layerNames, ...
       makeLayer("i-GaAsPN absorber","GaAsPN",1500e-7*tS,max(2,round(240*tS)),matAbs,NdI,NaI,true,absOpt));
@@ -224,7 +224,7 @@ if opts.InterfaceSlabNodes > 0
   layers = newL; layerNames = newNames; junctions = newJ;
 end
 if opts.BGN_eV > 0
-  % round-6 review check: rigid band-gap narrowing of every layer doped >= opts.BGNThreshold; p-type: valence band up (chi fixed),
+  % robustness check: rigid band-gap narrowing of every layer doped >= opts.BGNThreshold; p-type: valence band up (chi fixed),
   % n-type: conduction band down (chi + dEg). Optical tables, B_rad and lifetimes unchanged.
   for k = 1:numel(layers)
     Ndop = max(layers(k).Nd, layers(k).Na);

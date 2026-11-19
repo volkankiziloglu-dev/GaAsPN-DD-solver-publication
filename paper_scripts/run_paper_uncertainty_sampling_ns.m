@@ -1,5 +1,5 @@
 function T = run_paper_uncertainty_sampling_ns(iStart, iEnd, tag)
-%RUN_PAPER_UNCERTAINTY_SAMPLING_NS Paired sampling in the nanosecond-lifetime regime (referee check).
+%RUN_PAPER_UNCERTAINTY_SAMPLING_NS Paired sampling in the nanosecond-lifetime regime.
 % Same design as run_paper_uncertainty_sampling.m (Latin hypercube, fixed seed, every sample applied to HJ-0, F-HJ, RBSF-GaP, RHJ, AM1.5G and
 % CIE 6500 K / 1000 lx, production sweeps and acceptance gates), but with a lifetime range covering device-effective values and two extra
 % dimensions that decide the ranking (results of cases/run_paper_referee_checks.m):

@@ -1,4 +1,4 @@
-"""Indifference band of the crossover ratio (round-6 review R4-M1): the ratios r at which PCE_RHJ - PCE_RBSF = -m and +m
+"""Indifference band of the crossover ratio: the ratios r at which PCE_RHJ - PCE_RBSF = -m and +m
 (m = 0.1 points, the equivalence margin; 0.2 points in the nanosecond regime), linear interpolation in log r on the design-map grid.
 Input: results/paper_design_map_merged/design_map_[abcd].csv (S_back = 1e5, mu_n = 500, W = 1.5 um). Output: results/paper_design_map_merged/rstar_band.csv"""
 import glob, os

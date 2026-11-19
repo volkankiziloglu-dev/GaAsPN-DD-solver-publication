@@ -1,4 +1,4 @@
-"""Perimeter recombination and loss-transferred efficiency estimate (simulated referee R3-3/R3-6, docs/HAKEM_SIMULASYONU_2026-11-07.md).
+"""Perimeter recombination and loss-transferred efficiency estimate.
 
 1. Perimeter diode. A mesa perimeter adds J_per(V) = J0_per * (P/A) * (exp(V/(2 V_T)) - 1) (A/cm2; J0_per in A/cm of perimeter,
    ideality 2) to the dark current. It is superposed on the model J-V curves (nominal parameters, tau = 0.6 us, CIE 6500 K;

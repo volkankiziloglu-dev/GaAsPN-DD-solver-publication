@@ -89,7 +89,7 @@ Fphin(idxC) = (JnSeg(idxC) - JnSeg(idxC-1)) - c.Q*hAvgC.*(RtotN - Gprofile(idxC)
 Fphip(idxC) = (JpSeg(idxC) - JpSeg(idxC-1)) + c.Q*hAvgC.*(RtotP - Gprofile(idxC));
 
 % ---- Front boundary (i=1): Dirichlet phi=0 (ideal ohmic contact) ----
-% Optional (2026-11-07, referee check): a finite dev.Sfront replaces the
+% Optional (2026-11-07, robustness check): a finite dev.Sfront replaces the
 % minority-carrier Dirichlet row by the Robin law -J/q = Sfront*(c - c0),
 % the mirror of the back contact; without the field (or Sfront = Inf) the
 % residual is unchanged.

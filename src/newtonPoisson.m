@@ -1,8 +1,8 @@
 function [psi, converged, iterOut, residualNorm] = newtonPoisson(dev, psiInit, un, vp, psiLeftBC, psiRightBC, equilibriumFlag, verbose)
-% common/newtonPoisson.m'nin kopyasi -- epsL/epsR artik c.EPS0 (bosluk
-% gecirgenligi, 8.85e-14 F/cm) ile carpiliyor (bkz. MATHEMATICAL_MODEL.md
-% Bolum K madde 12), ARTI [converged, iterOut, residualNorm] cikislari
-% (dis inceleme madde 1.2).
+% Copy of common/newtonPoisson.m -- epsL/epsR are now multiplied by c.EPS0 (vacuum
+% permittivity, 8.85e-14 F/cm) (see MATHEMATICAL_MODEL.md
+% Section K item 12), PLUS [converged, iterOut, residualNorm] outputs
+% (external review item 1.2).
 if nargin < 8, verbose = false; end
 c = constants();
 N = dev.N; h = dev.h; eps_ = dev.eps; Nd = dev.Nd; Na = dev.Na;
@@ -28,7 +28,7 @@ a(idx) = coeffL; cc(idx) = coeffR;
 
 converged = false;
 deltaTol = 1e-10;
-residualTol = 1e-6; % dis inceleme madde 2.2: olceklendirilmis residual esigi
+residualTol = 1e-6; % external review item 2.2: scaled residual threshold
 maxIter = 60;
 for iter = 1:maxIter
   if equilibriumFlag
@@ -47,7 +47,7 @@ for iter = 1:maxIter
   d(idx) = -F;
 
   delta = thomasSolve(a, b, cc, d);
-  % DAMPED NEWTON (bkz. newtonPoissonML_v2.m'deki ayni-isimli not).
+  % DAMPED NEWTON (see the note of the same name in newtonPoissonML_v2.m).
   maxStep = 0.5; % V
   maxAbsDelta = max(abs(delta));
   if maxAbsDelta > maxStep

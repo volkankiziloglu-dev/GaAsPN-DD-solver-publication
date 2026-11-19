@@ -1,5 +1,5 @@
 function T = run_paper_interface_mesh(slice)
-%RUN_PAPER_INTERFACE_MESH Local mesh refinement at the heterointerfaces (simulated referee R1-2; docs/HAKEM_SIMULASYONU_2026-11-06.md).
+%RUN_PAPER_INTERFACE_MESH Local mesh refinement at the heterointerfaces.
 % The abrupt band step lies inside one Scharfetter-Gummel segment whose width is the node spacing of the left layer (1 nm at the
 % n+-GaP/GaAsPN front interface, 6.25 nm at the GaAsPN/p+-GaP rear interface). buildPaperArchitecture(...,'InterfaceSlabNodes',ns) splits
 % a 5 nm slab of the same material off each side of every heterointerface and meshes it with ns nodes (25 -> 0.2 nm, 50 -> 0.1 nm).

@@ -1,24 +1,24 @@
 function R = tmmReflectance(lambda_nm, n_list, d_list_nm)
-% Genel N-katmanli ince-film aktarim matrisi (transfer matrix method,
-% Macleod "Thin-Film Optical Filters" formulasyonu) yansima hesaplayicisi,
-% NORMAL GELIS (0 derece) icin. Herhangi bir ARC tasarimina uygulanabilir
-% (Gorev #10), sadece GaP/RearHJT'ye ozgu degil.
+% General N-layer thin-film transfer matrix (transfer matrix method,
+% Macleod "Thin-Film Optical Filters" formulation) reflectance calculator,
+% for NORMAL INCIDENCE (0 degrees). Applicable to any ARC design
+% (Task #10), not specific to GaP/RearHJT.
 %
-% lambda_nm: dalga boyu [nm] (skaler)
-% n_list: [n0 n1 n2 ... nK ns] -- kompleks kirilma indisleri, n0=gelis
-%   ortami (genelde hava, 1.0), ns=alttas (yari-sonsuz), n1..nK ARA
-%   katmanlar (ince film). Sogurma varsa n=n_gercek - i*k seklinde (fiziksel
-%   isaret kurali: sonme, TMM formulunu degistirmez).
-% d_list_nm: [d1 d2 ... dK] -- ARA katmanlarin kalinliklari [nm] (n_list'ten
-%   2 eksik olmali: n0 ve ns yari-sonsuz oldugundan kalinliksiz).
+% lambda_nm: wavelength [nm] (scalar)
+% n_list: [n0 n1 n2 ... nK ns] -- complex refractive indices, n0=incidence
+%   medium (usually air, 1.0), ns=substrate (semi-infinite), n1..nK INTERMEDIATE
+%   layers (thin films). With absorption, n=n_real - i*k (physical
+%   sign convention: extinction, does not change the TMM formula).
+% d_list_nm: [d1 d2 ... dK] -- thicknesses of the INTERMEDIATE layers [nm] (must be
+%   2 shorter than n_list: n0 and ns are semi-infinite, hence have no thickness).
 %
-% R: yansima orani (0-1), |r|^2.
+% R: reflectance (0-1), |r|^2.
 n0 = n_list(1);
 ns = n_list(end);
 nFilms = n_list(2:end-1);
 K = numel(nFilms);
 if numel(d_list_nm) ~= K
-  error('tmmReflectance: d_list_nm uzunlugu n_list''teki ARA katman sayisiyla (K=%d) eslesmiyor', K);
+  error('tmmReflectance: d_list_nm length does not match the number of INTERMEDIATE layers in n_list (K=%d)', K);
 end
 M = eye(2);
 for j = 1:K

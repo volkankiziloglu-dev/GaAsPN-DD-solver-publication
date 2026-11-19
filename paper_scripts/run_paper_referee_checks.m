@@ -1,5 +1,5 @@
 function T = run_paper_referee_checks(part)
-%RUN_PAPER_REFEREE_CHECKS Two checks raised by the simulated referee review (docs/HAKEM_SIMULASYONU_2026-11-04.md).
+%RUN_PAPER_REFEREE_CHECKS Two robustness checks (rear contact and lifetime ratio).
 % part 'A': n-/p-type absorber lifetime ratio. RHJ has an n-type absorber with lifetime r*tauP; HJ-0, F-HJ and RBSF-GaP keep tauP.
 %           tauP in {600, 100, 10, 1} ns, r in {1, 3, 10, 30, 100}; AM1.5G and 6500 K / 1000 lx. Other parameters nominal.
 % part 'B': rear-contact boundary of the HJ-0 control (and RBSF-GaP for reference): Sback in {1e5, 1e3, 0} cm/s.

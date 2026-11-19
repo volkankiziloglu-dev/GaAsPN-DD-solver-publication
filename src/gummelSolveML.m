@@ -1,20 +1,20 @@
 function out = gummelSolveML(dev, V, Gprofile, opts)
-% RearHJT/gummelSolveML.m'nin kopyasi -- newtonPoissonML (eps0-duzeltilmis)
-% cagiriyor. Elektron/hol BC dagitimi zaten kosulluydu (RearHJT'nin kendi
-% "Madde 6" duzeltmesi, common/gummelSolve.m'de eksikti) -- burada
-% degismedi. Varsayilan relax/maxIter, gummelSolve.m ile AYNI mantikla
-% degistirildi (bkz. o dosyadaki not).
+% Copy of RearHJT/gummelSolveML.m -- calls newtonPoissonML (eps0-corrected).
+% The electron/hole BC dispatch was already conditional (RearHJT's own
+% "Item 6" fix, missing in common/gummelSolve.m) -- unchanged
+% here. Default relax/maxIter were changed with the SAME logic as in gummelSolve.m
+% (see the note in that file).
 %
-% TEShISTIK EKLEMELER (dis inceleme madde 1.2/1.5/3.3):
-%  - un/vp hesaplamasindaki exp() argumanlari artik sinirlandiriliyor
-%    (sgBernoulli'nin zaten yaptigi korumanin ayni turu) -- buyuk bant
-%    ofseti/ileri kutuplamada tasma/NaN riski vardi.
-%  - newtonPoissonML artik [psi,converged,iter,residual] donduruyor;
-%    bu bilgi out.poissonConverged/out.poissonResidual olarak disari
-%    tasiniyor, dis Gummel dongusu ic Poisson basarisiz olursa BUNU
-%    da "converged" durumuna dahil ediyor (once sessizce yok sayiliyordu).
-%  - akim SADECE floor(N/2)'de degil, TUM ic dugumlerde hesaplanip
-%    surekliligi (deltaJ) raporlaniyor.
+% DIAGNOSTIC ADDITIONS (external review items 1.2/1.5/3.3):
+%  - the exp() arguments in the un/vp computation are now clamped
+%    (the same kind of protection sgBernoulli already applies) -- with large band
+%    offsets/forward bias there was a risk of overflow/NaN.
+%  - newtonPoissonML now returns [psi,converged,iter,residual];
+%    this information is passed out as out.poissonConverged/out.poissonResidual,
+%    and the outer Gummel loop now ALSO includes a failed inner Poisson solve
+%    in the "converged" status (previously it was silently ignored).
+%  - the current is computed NOT ONLY at floor(N/2) but at ALL interior nodes, and its
+%    continuity (deltaJ) is reported.
 c = constants();
 N = dev.N; ni = dev.ni; Nd = dev.Nd; Na = dev.Na;
 
@@ -22,7 +22,7 @@ if nargin < 4, opts = struct(); end
 if ~isfield(opts,'maxIter'), opts.maxIter = 1500; end
 if ~isfield(opts,'relax'), opts.relax = 0.05; end
 
-EXP_CLAMP = 700; % exp(700)~1e304, double tasmasindan (~1.8e308) once guvenli sinir
+EXP_CLAMP = 700; % exp(700)~1e304, safe limit before double overflow (~1.8e308)
 
 if Nd(1) > 0
   nLeft = Nd(1);
@@ -50,7 +50,7 @@ if isfield(opts,'pInit') && ~isempty(opts.pInit), p = opts.pInit; else, p = dev.
 
 Sback = dev.Sback;
 converged = false;
-poissonConverged = true; % son ic Poisson cagrisinin durumu
+poissonConverged = true; % status of the last inner Poisson call
 poissonResidual = NaN;
 poissonFailCount = 0;
 negFloorTotal = 0;
@@ -71,13 +71,13 @@ for iter = 1:opts.maxIter
   else
     pNew = solveHoleContinuity(dev, psi, pLeft, pRight, Gprofile, nPrevIter, pPrevIter, Sback, pRight);
   end
-  % N.16 (dis inceleme): 1e-30 tabani daha once SESSIZCE negatif/anlamsiz
-  % cozumleri (thomasSolve.m'nin yikici-iptal basarisizligi, bkz.
-  % MATHEMATICAL_MODEL.md N.16) "yakinsanmis" gibi gosteriyordu. Negatif
-  % (fiziksel olarak imkansiz, sadece pozitif-ama-kucuk degil) degerlerin
-  % sayisi ayrica sayilip out.negFloorHit olarak disari tasiniyor; bu
-  % sayimin son iterasyonda sifirdan farkli olmasi out.converged'i FALSE
-  % yapar (asagida).
+  % N.16 (external review): the 1e-30 floor previously SILENTLY made negative/meaningless
+  % solutions (destructive-cancellation failure of thomasSolve.m, see
+  % MATHEMATICAL_MODEL.md N.16) look "converged". The number of negative
+  % (physically impossible, not merely positive-but-small) values
+  % is counted separately and passed out as out.negFloorHit; this
+  % count being nonzero at the last iteration makes out.converged FALSE
+  % (below).
   negFloorCount = sum(nNew < 0) + sum(pNew < 0);
   negFloorTotal = negFloorTotal + negFloorCount;
   negFloorMaxPerIter = max(negFloorMaxPerIter, negFloorCount);
@@ -149,9 +149,9 @@ for polishIter = 1:25
   end
 end
 
-% Akim surekliligi: TUM ic dugumlerde Jn+Jp hesapla (sadece floor(N/2)
-% degil -- dis inceleme madde 1.5). Kararli durumda sabit olmali;
-% degilse deltaJ bunu yakalar.
+% Current continuity: compute Jn+Jp at ALL interior nodes (not only floor(N/2)
+% -- external review item 1.5). It should be constant in steady state;
+% if not, deltaJ captures it.
 idxJ = 1:N-1;
 psiEffFinalN = psi + dev.psiOffsetN;
 psiEffFinalP = psi + dev.psiOffsetP;
@@ -164,7 +164,7 @@ JpSeg = c.Q*DpSeg./dev.h(idxJ) .* (p(idxJ).*sgBernoulli(dPsiP) - p(idxJ+1).*sgBe
 JtotSeg = JnSeg + JpSeg;
 
 Jterminal = median(JtotSeg);
-Jfloor = 1e-12; % A/cm^2, mutlak taban (deltaJ'nin sifira bolunmesini onler)
+Jfloor = 1e-12; % A/cm^2, absolute floor (prevents division of deltaJ by zero)
 deltaJ = (max(JtotSeg) - min(JtotSeg)) / max(max(abs(JtotSeg)), Jfloor);
 
 isFinite = all(isfinite(psi)) && all(isfinite(n)) && all(isfinite(p)) && isfinite(Jterminal);
@@ -193,16 +193,16 @@ else
 end
 
 out.psi = psi; out.n = n; out.p = p; out.J = Jterminal;
-% N.16 (dis inceleme, ONEMLI DUZELTME): ilk denemede negFloorHit>0 iken
-% out.converged=false yapmak denendi VE GERI ALINDI -- aydinlatilmis N.1'in
-% TAM sweepJVML.m suprumesini V=0.0'da DAHI derhal kirdi (bkz.
-% MATHEMATICAL_MODEL.md N.16.8) -- bu, N.16'nin teshis ettigi kusurun
-% sanildigindan COK daha yaygin oldugunu (yuksek-V'ye ozgu degil, hemen
-% HER islenmis noktada bir miktar negatif-tabanli dugum olustugunu)
-% ortaya cikardi. Bu buyuklukte bir davranis degisikligini sessizce
-% production'a koymak yerine, negFloorHit SADECE TESHIS ICIN raporlanir --
-% out.converged mevcut tanimiyla (isFinite+yakinsama) DEGISMEDEN kalir,
-% cagiran kod (sweepJVML.m gibi) bu bilgiyi ISTERSE kullanabilir.
+% N.16 (external review, IMPORTANT FIX): in a first attempt, setting
+% out.converged=false when negFloorHit>0 was tried AND REVERTED -- it broke the illuminated N.1
+% FULL sweepJVML.m sweep immediately, EVEN at V=0.0 (see
+% MATHEMATICAL_MODEL.md N.16.8) -- this revealed that the defect diagnosed by N.16
+% is MUCH more widespread than assumed (not specific to high V; some
+% negative-floored nodes appear at almost EVERY processed point).
+% Instead of silently putting a behavior change of this magnitude
+% into production, negFloorHit is reported FOR DIAGNOSIS ONLY --
+% out.converged stays UNCHANGED with its current definition (isFinite+convergence),
+% and calling code (such as sweepJVML.m) can use this information IF IT WANTS.
 out.negFloorHit = negFloorCount;
 out.negFloorTotal = negFloorTotal;
 out.negFloorMaxPerIter = negFloorMaxPerIter;

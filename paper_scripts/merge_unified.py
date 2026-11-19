@@ -40,7 +40,7 @@ for t in "abcd":
 merge([P("paper_absorber_doping", "doping_ranking.csv")], [P("paper_absorber_doping_unified_am", "doping_ranking.csv")] if os.path.exists(P("paper_absorber_doping_unified_am", "doping_ranking.csv")) else [],
       [P("paper_absorber_doping_unified", "doping_ranking.csv")], P("paper_absorber_doping_merged", "doping_ranking.csv"), sortcols=("N_cm3", "Architecture"))
 
-# ---- referee checks / Eg-optics shift
+# ---- robustness checks / Eg-optics shift
 od = P("paper_referee_checks"); nd = P("paper_referee_checks_unified"); ad = P("paper_referee_checks_unified_am"); md = P("paper_referee_checks_merged")
 os.makedirs(md, exist_ok=True)
 for fn in ("referee_checks_A.csv", "referee_checks_B.csv", "referee_checks_C.csv", "referee_checks_E.csv", "referee_checks_T.csv", "eg_optics_shift_CB.csv", "eg_optics_shift_VB.csv"):

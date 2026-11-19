@@ -1,5 +1,5 @@
 function T = run_klitzke_hj_rhj_production(meshScale)
-%RUN_KLITZKE_HJ_RHJ_PRODUCTION Klitzke GaInP homojunction (HJ) and lower-doped RHJ with ONE solver (round-5 review R1/R5):
+%RUN_KLITZKE_HJ_RHJ_PRODUCTION Klitzke GaInP homojunction (HJ) and lower-doped RHJ with ONE solver:
 % the quasi-Fermi-potential solver with the production residual and a finite-difference Jacobian (gummelSolveQFP; the analytic-Jacobian
 % variant used in production does not handle the three SRH centres of the HJ base and fails at the first point), the production indoor sweep (0.02 V grid, 0.02 V cold start,
 % continuation to 0 V, forward continuation), indoorAcceptanceGate class and the unified extractor (pvMetrics on all finite points).

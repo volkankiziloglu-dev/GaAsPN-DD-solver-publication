@@ -1,5 +1,5 @@
 function T = run_paper_offset_thermionic(job, tag)
-%RUN_PAPER_OFFSET_THERMIONIC Referee check: conduction-band-dominated band offset and thermionic-emission-limited heterointerface transport.
+%RUN_PAPER_OFFSET_THERMIONIC Robustness check: conduction-band-dominated band offset and thermionic-emission-limited heterointerface transport.
 % job.chi        list of GaP electron affinities (eV); absorber chi = 4.0 eV, so chi = 3.8 gives dEc = 0.20 / dEv = 0.20 eV (nominal) and
 %                chi = 3.65 gives dEc = 0.35 / dEv = 0.05 eV (conduction-band dominated, as expected from the band-anticrossing picture).
 % job.codes      architectures; job.v  list of thermionic velocities (cm/s, vn = vp), NaN = standard Scharfetter-Gummel flux (reference).

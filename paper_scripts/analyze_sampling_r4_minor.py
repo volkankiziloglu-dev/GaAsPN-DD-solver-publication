@@ -1,4 +1,4 @@
-"""Small statistical checks requested by referee R4 (third simulated review, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+"""Small statistical checks of the nanosecond-regime sampling.
 1. Realized input-input Spearman correlations of the two Latin hypercube samplings (no correlation control was used).
 2. Partial rank correlations (PRCC: Spearman correlation of the rank residuals after regressing out the other sampled inputs) for the
    coefficients quoted in the text, to show whether input correlations confound them.

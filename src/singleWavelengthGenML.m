@@ -1,28 +1,28 @@
 function [Gnode, transFlux] = singleWavelengthGenML(dev, lam, irr, frontR, cvIntegrate)
-% cvIntegrate (optional, default false; 2026-11-07 referee check R1-5): if true, Gnode(i) is the exact
+% cvIntegrate (optional, default false; 2026-11-07): if true, Gnode(i) is the exact
 %   Beer-Lambert absorption integrated over the control volume of node i, divided by its width
 %   [x_i - h_{i-1}/2, x_i + h_i/2], using the same piecewise-constant attenuation (alpha of the left node
 %   of each segment) as the flux recursion; the sum over control volumes then equals the absorbed flux.
 %   false reproduces the nodal sampling Gnode(i) = alpha(i)*phi(x_i) of the production runs.
 if nargin < 5 || isempty(cvIntegrate), cvIntegrate = false; end
-% common/singleWavelengthGen.m'nin cok-katmanli hali: TEK bir isAbs/ETL
-% ayrimi yerine, HER dugum kendi soğurma modelini tasir (dev.useOpticalTable
-% -> o dugumun KENDI katmanina ait tablosu, dev.opticalTableNode{i};
-% yoksa dev.alphaMaxNode/edgeWidthNode ile lojistik-kenar; ikisi de
-% yoksa/alphaMax=0 ise seffaf), Beer-Lambert TUM cihaz boyunca kesintisiz
-% birikir. 2-bolgeli ozel durumda (ETL seffaf, Abs tabloyla soguruyor)
-% common/singleWavelengthGen.m ile AYNI sonucu verir.
+% Multilayer version of common/singleWavelengthGen.m: instead of a SINGLE isAbs/ETL
+% distinction, EACH node carries its own absorption model (dev.useOpticalTable
+% -> the table belonging to that node's OWN layer, dev.opticalTableNode{i};
+% otherwise logistic edge via dev.alphaMaxNode/edgeWidthNode; if neither
+% exists/alphaMax=0, transparent), Beer-Lambert accumulates continuously through the ENTIRE device.
+% In the 2-region special case (ETL transparent, Abs absorbing via table) it gives
+% the SAME result as common/singleWavelengthGen.m.
 %
-% frontR: (OPSIYONEL) on-yuzey yansima orani. Ya SKALER (dalga boyundan
-%   bagimsiz, eski davranis) ya da bir FONKSIYON TUTAMACI @(lam)->R
-%   (dalga-boyu-bagimli, Gorev #10 -- bkz. RearHJT/arcReflectanceGaP.m)
-%   olabilir. Bos/verilmemisse: eger 1. dugumun tablosu (veya, geriye-
-%   uyumluluk icin, eski tek dev.alphaTable) varsa dogrudan o tablonun
-%   ciplak-yuzey Fresnel yansimasi kullanilir (ESKI davranis) -- ONEMLI
-%   NOT: bu, cok-katmanli bir yapida (orn. GaP pencere/GaAsNP absorber)
-%   fiziksel olarak YANLIS olabilir, cunku isik ONCE pencereye carpar,
-%   dogrudan absorbere degil. Dogru sonuc icin cagiran kod frontR'yi
-%   ACIKCA (skaler veya fonksiyon) vermelidir -- bkz. RearHJT/run_4layer_with_ARC.m.
+% frontR: (OPTIONAL) front-surface reflectance. Can be either a SCALAR (wavelength-
+%   independent, old behavior) or a FUNCTION HANDLE @(lam)->R
+%   (wavelength-dependent, Task #10 -- see RearHJT/arcReflectanceGaP.m).
+%   If empty/not given: if the table of node 1 (or, for backward
+%   compatibility, the old single dev.alphaTable) exists, the bare-surface Fresnel
+%   reflectance of that table is used directly (OLD behavior) -- IMPORTANT
+%   NOTE: in a multilayer structure (e.g. GaP window/GaAsNP absorber) this
+%   may be physically WRONG, because light hits the window FIRST,
+%   not the absorber directly. For a correct result the calling code must give frontR
+%   EXPLICITLY (scalar or function) -- see RearHJT/run_4layer_with_ARC.m.
 c = constants();
 N = dev.N; x = dev.x; Eg = dev.Eg;
 Gnode = zeros(N,1);
@@ -63,7 +63,7 @@ elseif nargin >= 4 && ~isempty(frontR)
   frontRVal = frontR;
 elseif ~isempty(frontTbl)
   [~, nFront] = lookupTableAN(frontTbl, Ephoton);
-  frontRVal = ((nFront-1)/(nFront+1))^2; % ciplak-tablo-katmani Fresnel (eski davranis, bkz. yukaridaki not)
+  frontRVal = ((nFront-1)/(nFront+1))^2; % bare-table-layer Fresnel (old behavior, see note above)
 else
   frontRVal = 0;
 end
@@ -79,7 +79,7 @@ for i = 1:N
   elseif dev.alphaMaxNode(i) > 0
     a = alphaAbsorber(Ephoton, Eg(i), dev.alphaMaxNode(i), dev.edgeWidthNode(i));
   else
-    a = 0; % bu dugum seffaf
+    a = 0; % this node is transparent
   end
   fluxAtNode = phi0 * exp(-absDepth);
   Gnode(i) = a * fluxAtNode;

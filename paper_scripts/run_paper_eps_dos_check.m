@@ -1,5 +1,5 @@
 function T = run_paper_eps_dos_check(variant)
-%RUN_PAPER_EPS_DOS_CHECK Absorber permittivity and density-of-states check (round-5 review R2): nominal devices (HJ-0, F-HJ, RBSF-GaP, RHJ),
+%RUN_PAPER_EPS_DOS_CHECK Absorber permittivity and density-of-states check: nominal devices (HJ-0, F-HJ, RBSF-GaP, RHJ),
 % AM1.5G and CIE 6500 K/1000 lx, production sweeps and unified extractor, with
 %   variant 'nominal' : eps = 12.9, Nc = Nv = 1e19 (production)
 %   variant 'eps'     : eps = 11.1 (Vegard interpolation for GaN0.03P0.924As0.046 with GaP 11.1, GaAs 12.9, GaN 9.7)

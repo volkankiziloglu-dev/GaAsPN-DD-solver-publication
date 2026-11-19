@@ -1,5 +1,5 @@
 function T = run_paper_mesh_cvgen(code, scales)
-%RUN_PAPER_MESH_CVGEN Mesh study with control-volume-integrated generation (simulated referee R1-5, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+%RUN_PAPER_MESH_CVGEN Mesh study with control-volume-integrated generation.
 % The production generation is sampled at the nodes, G_i = alpha_i*phi(x_i), and multiplied by the control-volume width; its error is
 % O(alpha*h), i.e. first order in the mesh. Here G is the exact Beer-Lambert absorption integrated over each control volume
 % (deviceGenAndTransmitML(...,true)), everything else as run_paper_mesh_richardson.m (production setup, 0.02 V grid, unified extractor:

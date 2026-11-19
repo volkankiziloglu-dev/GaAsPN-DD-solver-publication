@@ -1,6 +1,6 @@
 function [F, n, p, JnSeg, JpSeg] = assembleResidualQFPFD12(dev, psi, phin, phip, V, Gprofile)
 %ASSEMBLERESIDUALQFPFD12 Fermi-Dirac F_1/2 statistics (fd12.m) with the consistent degenerate Scharfetter-Gummel flux of
-% assembleResidualQFPFermiDiracBCSG.m (2026-11-07, round-4 review R1-3). Segment degeneracy factor g = (eta2-eta1)/(ln F(eta2)-ln F(eta1))
+% assembleResidualQFPFermiDiracBCSG.m (2026-11-07). Segment degeneracy factor g = (eta2-eta1)/(ln F(eta2)-ln F(eta1))
 % (midpoint value 1/(d ln F/d eta) for |eta2-eta1| < 1e-4); the band-parameter part of the drift argument is not divided by g, so the
 % flux vanishes exactly in equilibrium, also across heterojunctions. Recombination as in the Blakemore files (n_i,eff supplied by the caller).
 c = constants();

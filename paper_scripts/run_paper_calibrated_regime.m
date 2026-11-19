@@ -1,5 +1,5 @@
 function T = run_paper_calibrated_regime(code)
-%RUN_PAPER_CALIBRATED_REGIME Architecture comparison in the recombination regime calibrated to the measured Geisz MD421 GaNPAs cell (referee check R2-5 / R5-3).
+%RUN_PAPER_CALIBRATED_REGIME Architecture comparison in the recombination regime calibrated to the measured Geisz MD421 GaNPAs cell.
 % The staged calibration of run_geisz2002_staged_calibration.m (results/geisz2002_staged_calibration.csv, rank 1) matched J_sc = 5.8 mA/cm2, V_oc = 1.12 V, FF = 60 % and 3.9 % with
 %   two SRH centres: midgap (tau_n = tau_p = 0.5 ns) and E_i + 0.25 eV (tau_n = 15 ns, tau_p = 1.5 ns), an effective collection scale of 0.46 on the optical generation, and a terminal shunt R_sh = 631 Ohm cm2 (R_s = 0).
 % Here the same centres are placed in the GaAsPN absorber layers of one architecture (code), the centres have fixed capture times, so the minority-carrier lifetimes of the n-type RHJ absorber and of the p-type absorbers follow from the SRH expression;

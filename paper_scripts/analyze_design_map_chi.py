@@ -1,5 +1,5 @@
-"""Dependence of the crossover ratio r*(tau_p) on the GaP electron affinity chi_GaP (simulated referee round 4, W3/R2/R4,
-docs/HAKEM_SIMULASYONU_2026-11-07.md). chi_abs = 4.0 eV, so Delta E_c(GaP/absorber) = chi_abs - chi_GaP: 3.7 -> +0.30 eV (type I),
+"""Dependence of the crossover ratio r*(tau_p) on the GaP electron affinity chi_GaP.
+ chi_abs = 4.0 eV, so Delta E_c(GaP/absorber) = chi_abs - chi_GaP: 3.7 -> +0.30 eV (type I),
 3.8 (nominal) -> +0.20, 4.0 -> 0, 4.15 -> -0.15, 4.3 -> -0.30 eV (type II, GaP conduction band below the absorber's).
 Inputs : results/paper_design_map_chi/design_map_chi<chi>_{a,b}.csv (RBSF-GaP and RHJ, S_back = 1e5, mu_n = 500),
          results/paper_design_map_merged/design_map_[abcd].csv (nominal chi_GaP = 3.8),

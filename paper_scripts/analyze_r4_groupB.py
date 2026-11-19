@@ -1,4 +1,4 @@
-"""Analysis of the round-4 group-B runs (docs/HAKEM_SIMULASYONU_2026-11-07.md, roadmap B6-B11).
+"""Analysis of the group-B robustness runs (run_paper_r4_analyses.m).
 Inputs: results/paper_r4_analyses/{L200,OPT,SRH}_*of*.csv (cases/run_paper_r4_analyses.m), results/paper_mesh_richardson/<code>_tau<t>_x<s>_<cond>.csv
 (cases/run_paper_mesh_richardson.m with tauNs = 1, 10), results/paper_offset_thermionic/offset_thermionic_c4{22,3}_*.csv, results/paper_fd_check5/
 (cases/run_paper_fd_check5.m) with results/paper_fd_check4/ for the Boltzmann reference, results/paper_design_map_merged/rstar.csv.

@@ -1,5 +1,5 @@
 function T = run_paper_sfront(slice)
-%RUN_PAPER_SFRONT Finite front-contact recombination velocity (simulated referees R5-M4, R1; docs/HAKEM_SIMULASYONU_2026-11-06.md).
+%RUN_PAPER_SFRONT Finite front-contact recombination velocity.
 % The production model uses an ideal ohmic (Dirichlet) front contact, i.e. S_front = infinity for the minority carrier (holes in the
 % n+-GaP window). With the optional field dev.Sfront the minority-carrier front row becomes the Robin law -J/q = S_front*(p - p0)
 % (assembleResidualQFP.m and the analytic Jacobians, verified by cases/check_sfront_impl.m; without the field the production result

@@ -1,8 +1,8 @@
-"""LaTeX tables of the checks requested by the third simulated review (docs/HAKEM_SIMULASYONU_2026-11-06.md), read from the result CSVs.
+"""LaTeX tables of the supplementary robustness checks, read from the result CSVs.
 Writes latex/tables/supp_checks7_<name>.tex (one file per table), included by latex/supp_mat_en.tex.
 Inputs: results/paper_sfront, results/paper_pin (parts U, V), results/paper_referee_checks_merged/referee_checks_A.csv, results/paper_pin (N, M),
         results/paper_prior_sensitivity, external_validation/scaps_output/scaps_prod_crosscheck.csv, results/paper_mesh_cvgen,
-        results/paper_interface_mesh, results/paper_fd_check4 (if complete), results/paper_design_map_chi (round-4 review, 2026-11-07).
+        results/paper_interface_mesh, results/paper_fd_check4 (if complete), results/paper_design_map_chi.
 """
 import os, csv, glob, math
 
@@ -187,7 +187,7 @@ if fd and all(math.isfinite(float(r["PCE_pct"])) for r in fd if r["Variant"] == 
         L.append("%s & %s \\\\" % (TEX[a], " & ".join(cells)))
     L += ["\\bottomrule", "\\end{tabular}", "\\end{table*}"]
     write("fd4", L)
-# ---------- 10. chi_GaP dependence of r* (round-4 review) ----------
+# ---------- 10. chi_GaP dependence of r* ----------
 rc = rows(["results", "paper_design_map_chi", "rstar_chi.csv"])
 if rc:
     RS = {(float(r["chiGaP"]), r["Condition"], float(r["tauP_ns"])): float(r["r_star"]) for r in rc}

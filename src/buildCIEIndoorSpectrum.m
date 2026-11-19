@@ -1,18 +1,18 @@
 function pts = buildCIEIndoorSpectrum(illum_mode, lux_target)
-% Gercek CIE standart indoor aydinlatma spektrumu, deviceGenAndTransmit/
-% spectrumPower'in bekledigi [lambda_nm, irradiance_Wm2nm] formatinda.
+% Real CIE standard indoor illumination spectrum, in the [lambda_nm, irradiance_Wm2nm]
+% format expected by deviceGenAndTransmit/spectrumPower.
 %
-% Mantik get_CIE_irradiance.m (earlier GaAsNP project) ile AYNI -- veri dosyalari
-% bu projenin data/ klasorune kopyalandi (loadRealAM15G.m ile ayni
-% konvansiyon), boylece iki proje klasoru arasinda kirilgan bir bagimlilik
-% olusmuyor.
+% Logic is the SAME as get_CIE_irradiance.m (earlier GaAsNP project) -- the data files
+% were copied into this project's data/ folder (same convention as
+% loadRealAM15G.m), so no fragile dependency between the two project
+% folders is created.
 %
 % illum_mode: "2700K" | "4000K" | "6500K" (CIE LED-B1/B3/B5) | "4000F"
 %             (CIE FL11 narrow-band fluorescent, ~4000 K)
-% lux_target: hedef aydinlatma siddeti (lux). Tipik ofis: 300-750 lux.
+% lux_target: target illuminance (lux). Typical office: 300-750 lux.
 %
-% Donen pts(:,2) toplam W/m2/nm cinsinden GERCEK isinim yogunlugudur --
-% buildIndoorLED.m'deki sentetik iki-Gaussian tahmininin YERINE gecer.
+% The returned pts(:,2) is the REAL spectral irradiance in total W/m2/nm --
+% it REPLACES the synthetic two-Gaussian estimate in buildIndoorLED.m.
 
 if nargin < 2 || isempty(lux_target), lux_target = 500; end
 
@@ -38,16 +38,16 @@ switch illum_mode
     % with the production FL11 series.
     spec_raw = FL_data(:,12);  % CIE FL11 (formerly F11/TL84 class)
   otherwise
-    error('buildCIEIndoorSpectrum: bilinmeyen illum_mode ''%s'' (2700K|4000K|6500K|4000F olmali)', illum_mode);
+    error('buildCIEIndoorSpectrum: unknown illum_mode ''%s'' (must be 2700K|4000K|6500K|4000F)', illum_mode);
 end
 
 spec = spec_raw / trapz(wl_nm, spec_raw);
-K = 683; % lm/W, standart fotopik luminous efficacy sabiti
+K = 683; % lm/W, standard photopic luminous efficacy constant
 lux_calc = K * trapz(wl_nm, spec .* V_lambda);
 spec_lux = spec * (lux_target / lux_calc);
 
-LER = lux_target / trapz(wl_nm, spec_lux); % = lux_calc (bkz. get_CIE_irradiance.m)
-Pin_total = lux_target / LER;              % W/m2, hedef lux'u veren toplam radyant guc
+LER = lux_target / trapz(wl_nm, spec_lux); % = lux_calc (see get_CIE_irradiance.m)
+Pin_total = lux_target / LER;              % W/m2, total radiant power giving the target lux
 
 irradiance = spec * Pin_total; % W/m2/nm
 pts = [wl_nm, irradiance];

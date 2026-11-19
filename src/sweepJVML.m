@@ -1,48 +1,48 @@
 function [pts, status] = sweepJVML(dev, Gprofile, Vmin, Vmax, Vstep, initialState)
-% RearHJT/sweepJVML.m'nin kopyasi -- gummelSolveML (eps0-duzeltilmis)
-% cagiriyor, ARTI V=0->Vmin isinma supurmesi (eps0 duzeltmesinden sonra
-% Vmin sifirdan uzaksa tek buyuk bir Newton sicramasi thomasSolve.m'de
-% katastrofik iptale/NaN'a yol acabiliyordu -- bkz. MATHEMATICAL_MODEL.md
-% Bolum K madde 12/13).
+% Copy of RearHJT/sweepJVML.m -- calls gummelSolveML (eps0-corrected),
+% PLUS a V=0->Vmin warm-up sweep (after the eps0 fix, if
+% Vmin is far from zero, a single large Newton jump could lead to catastrophic
+% cancellation/NaN in thomasSolve.m -- see MATHEMATICAL_MODEL.md
+% Section K items 12/13).
 %
-% Monoton-J durdurma esigi ORANSAL (N.7'de bulunan mutlak-tolerans
-% hatasinin duzeltmesi): JtolAbs = max(1e-7, 1e-3*J0).
+% Monotonic-J stopping threshold is RELATIVE (fix of the absolute-tolerance
+% error found in N.7): JtolAbs = max(1e-7, 1e-3*J0).
 %
-% DUZELTME (dis inceleme madde 1.1/1.4): r.converged && r.isFinite HER
-% noktada kontrol ediliyor; basarisiz olursa onceki yakinsanmis
-% noktadan baslayarak gerilim adimi ikiye bolunerek (continuation/
-% bisection, en fazla maxSubdiv kademe) tekrar denenir.
+% FIX (external review items 1.1/1.4): r.converged && r.isFinite is checked at EVERY
+% point; on failure, starting from the previous converged
+% point, the voltage step is halved and retried (continuation/
+% bisection, at most maxSubdiv levels).
 %
-% DUZELTME (dis inceleme madde 2.4, REVIZE EDILMIS): ilk onerilen
-% "deltaJ'yi kabul esigine kat" fikri DENENDI ve YANLIS ciktigi
-% gosterildi -- debug_deltaJ_calibration.m/debug_deltaJ_profile_good.m
-% ile, ZATEN dogrulanmis N.1 homojonksiyonunun BILE aydinlatma altinda
-% deltaJ~1.4-1.8 (%140-180!) verdigi bulundu -- Config A'nin "bozuk"
-% ~0.1-0.4'undan BUYUK. Neden: aydinlatma altinda Jtot(x)'in DUZ olmasi
-% zaten fiziksel olarak beklenmez (Beer-Lambert soguru profili G(x)'i
-% derinlikle degistirir, bu yuzden toplam akim her noktada yerel
-% uretim-rekombinasyon butcesine gore degisir -- SADECE karanlikta
-% duz olmasi beklenir). deltaJ bu haliyle iyi/kotu ayirt edemiyor.
-% Bunun yerine, Config A'yi GERCEKTEN yakalayan sey kullaniliyor:
-% fotoakim, sogurulan MAKSIMUM foton akisini (JscMax) FIZIKSEL olarak
-% ASAMAZ -- saglam bir korunum siniri, keyfi bir esik degil. Bu sinir
-% SADECE J>0 (fotoakim-baskin, Jsc civari) rejiminde uygulanir; V,
-% Voc'u gectiginde J guclu negatif (karanlik-akim-baskin) olur ve
-% |J| JscMax'i asabilir -- bu NORMAL'dir, sinirlanmaz.
+% FIX (external review item 2.4, REVISED): the originally proposed
+% idea "add deltaJ to the acceptance threshold" was TRIED and shown to be
+% WRONG -- with debug_deltaJ_calibration.m/debug_deltaJ_profile_good.m
+% it was found that EVEN the ALREADY validated N.1 homojunction under illumination
+% gives deltaJ~1.4-1.8 (%140-180!) -- LARGER than the "bad"
+% ~0.1-0.4 of Config A. Reason: under illumination Jtot(x) is not expected
+% to be FLAT physically in the first place (the Beer-Lambert absorption profile changes G(x)
+% with depth, so the total current at each point varies with the local
+% generation-recombination budget -- it is expected to be flat ONLY in the
+% dark). In this form deltaJ cannot distinguish good from bad.
+% Instead, the quantity that REALLY catches Config A is used:
+% the photocurrent PHYSICALLY CANNOT EXCEED the MAXIMUM absorbed photon flux (JscMax)
+% -- a solid conservation bound, not an arbitrary threshold. This bound
+% is applied ONLY in the J>0 (photocurrent-dominated, near Jsc) regime; once V
+% exceeds Voc, J becomes strongly negative (dark-current-dominated) and
+% |J| may exceed JscMax -- this is NORMAL and is not limited.
 %
-% Tam, uretim/rekombinasyon-butcesi-farkinda bir surekluk-residual
-% kontrolu (dis incelemenin asil istedigi) AYRI, daha buyuk bir gorev
-% olarak ertelendi.
+% A full generation/recombination-budget-aware continuity-residual
+% check (what the external review actually asked for) was deferred as a SEPARATE, larger
+% task.
 %
-% DUZELTME (dis inceleme madde 2.6): ikinci (opsiyonel) cikis olarak
-% `status` struct'i eklendi -- cagiran kod artik supurmenin NEDEN
-% durdugunu (normal Vmax'a ulasti mi, yakinsamadi mi, akim fiziksel
-% siniri asti mi, monoton-J ihlali mi) acikca gorebilir. Mevcut
-% `pts = sweepJVML(...)` seklindeki eski cagrilar DEGISMEDEN calismaya
-% devam eder (MATLAB'da fazladan cikis argumani geriye-uyumludur).
+% FIX (external review item 2.6): a `status` struct was added as a second (optional)
+% output -- calling code can now see explicitly WHY the sweep
+% stopped (normal Vmax reached, no convergence, current exceeded the physical
+% bound, or monotonic-J violation). Existing
+% `pts = sweepJVML(...)` style old calls continue to work
+% UNCHANGED (an extra output argument is backward compatible in MATLAB).
 c = constants();
-JscMax = c.Q * trapz(dev.x, Gprofile); % A/cm^2, J>0 rejiminde fiziksel ust sinir
-JscMaxMargin = 1.05; % %5 pay -- kaba sweep/interpolasyon gurultusu icin
+JscMax = c.Q * trapz(dev.x, Gprofile); % A/cm^2, physical upper bound in the J>0 regime
+JscMaxMargin = 1.05; % %5 margin -- for coarse sweep/interpolation noise
 
 status = struct('completed',false,'stopReason','','lastVoltage',NaN,'nPoints',0);
 
@@ -70,13 +70,13 @@ if abs(Vmin) > warmupStep && nargin < 6
     end
     r = gummelSolveML(dev, V, Gprofile, opts);
     if ~r.isFinite
-      error('sweepJVML: isinma supurmesinde V=%.4f''te NaN/Inf', V);
+      error('sweepJVML: NaN/Inf at V=%.4f in the warm-up sweep', V);
     end
     if ~r.converged
-      error('sweepJVML: isinma supurmesinde V=%.4f''te yakinsamadi (iters=%d, poissonConverged=%d)', V, r.iters, r.poissonConverged);
+      error('sweepJVML: no convergence at V=%.4f in the warm-up sweep (iters=%d, poissonConverged=%d)', V, r.iters, r.poissonConverged);
     end
     if abs(V) < 1e-12 && abs(r.J) > JscMax*JscMaxMargin
-      error('sweepJVML: isinma supurmesinde V=%.4f''te J=%.4e, fiziksel JscMax=%.4e''i asiyor', V, r.J, JscMax);
+      error('sweepJVML: in the warm-up sweep at V=%.4f, J=%.4e exceeds the physical JscMax=%.4e', V, r.J, JscMax);
     end
     prev = r;
     prevV = V;
@@ -85,7 +85,7 @@ end
 if ~isfield(prev,'psi')
   r = gummelSolveML(dev, Vmin, Gprofile, struct());
   if ~r.isFinite || ~r.converged
-    error('sweepJVML: V=%.4f''te ilk cozum yakinsamadi/NaN (iters=%d)', Vmin, r.iters);
+    error('sweepJVML: initial solution at V=%.4f did not converge/NaN (iters=%d)', Vmin, r.iters);
   end
   prev = r; prevV = Vmin;
 end

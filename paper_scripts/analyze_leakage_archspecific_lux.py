@@ -1,4 +1,4 @@
-"""Architecture-specific leakage at 100, 200, 500 and 1000 lx (CIE 6500 K), round-5 review R3-1.
+"""Architecture-specific leakage at 100, 200, 500 and 1000 lx (CIE 6500 K).
 Same post-processing as cases/run_paper_leakage_archspecific.m, applied to the lux-series curves (results/paper_voc_lux, nominal 600 ns and
 10 ns, native 0.02 V grid, unified extractor):
   HJ-type designs (HJ-0, F-HJ, RBSF-GaP): diode + series-resistor branch fitted to the excess current of the Klitzke homojunction

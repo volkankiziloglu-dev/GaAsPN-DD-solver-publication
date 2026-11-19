@@ -1,4 +1,4 @@
-"""Prior sensitivity of the nanosecond-regime ranking frequency (simulated referee R4-1/R4-4, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+"""Prior sensitivity of the nanosecond-regime ranking frequency.
 
 The RBSF-GaP vs RHJ sign is set almost entirely by r = tau_n/tau_p relative to the deterministic crossover r*(tau_p) of the design map
 (RHJ ahead iff r > r*). Hence the sample frequency "RHJ ahead" of the ns sampling is P(r > r*(tau_p)) under the priors.

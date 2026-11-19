@@ -3,7 +3,7 @@ function n = solveElectronContinuity(dev, psi, nLeftBC, nRightBC, Gprofile, nPre
 % Back: Robin BC via Sback (surface recombination velocity) IF Sback/n0Back
 % are supplied; otherwise Dirichlet (n(N)=nRightBC), mirroring
 % solveHoleContinuity.m's optional-Sback pattern. FIX (external review,
-% Madde 6): previously Sback/n0Back were REQUIRED, so electrons always got
+% item 6): previously Sback/n0Back were REQUIRED, so electrons always got
 % Robin treatment at the back even when they are the MAJORITY carrier there
 % (n-type absorber) -- asymmetric with how holes are already dispatched
 % conditionally in gummelSolve.m/gummelSolveML.m. Existing 2-region callers
@@ -93,23 +93,23 @@ b(idx) = coefNi - Rcoef;
 % the right-hand side with a minus sign.
 d(idx) = -Gprofile(idx) - Rconst + Rint_perNode;
 
-% NOT (N.16 arastirmasi): item1 dark-current dogrulamasi sirasinda, bu
-% sistemin yuksek-V/guclu-uretim kosullarinda n(x)'i hacmin buyuk
-% kisminda yanlislikla 1e-30 tabanina cakip akim surekliligini
-% (Jtot(x)=sabit) bozdugu bulundu (bkz. MATHEMATICAL_MODEL.md N.16). IKI
-% duzeltme denendi ve HER IKISI DE basarisiz oldu, GERI ALINDI:
-% (1) kosegen on-kosullandirma -- tek bir dondurulmus psi anlik
-%     goruntusunde calisti, TAM Gummel dongusune gomulunce calismadi;
-% (2) robustTridiagSolve.m (kismi-pivotlamali yogun \ cozumu) -- hedef
-%     durumda HICBIR iyilesme saglamadi VE onceden calisan baska bir
-%     cihazda (2-katmanli literatur karsilastirmasi) YENI bir yakinsama
-%     basarisizligi yaratti. Bu, sorunun pivot-korumasi degil, HAM
-%     yogunluk degiskenlerinin (~30 mertebe dinamik aralik) COZUM
-%     UZAYININ KENDI kosul sayisindan kaynaklandigini kanitliyor -- hicbir
-%     dogrusal-cebir algoritmasi (pivotlu/pivotsuz) cift-duyarlikli
-%     aritmetigin kendi hassasiyet sinirini asamaz. Gercek duzeltme,
-%     degiskenlerin kendisini yeniden formule etmeyi (log-yogunluk/
-%     Slotboom, tam-baglasik Newton icinde) gerektiriyor -- bu, ayri, cok
-%     daha buyuk bir gorev. thomasSolve.m'ye GERI DONULDU.
+% NOTE (N.16 investigation): during the item1 dark-current validation it was found that
+% under high-V/strong-generation conditions this system wrongly collapsed n(x) to the
+% 1e-30 floor over a large part of the bulk, breaking current continuity
+% (Jtot(x)=const) (see MATHEMATICAL_MODEL.md N.16). TWO
+% fixes were tried and BOTH FAILED, and were REVERTED:
+% (1) diagonal preconditioning -- worked on a single frozen-psi
+%     snapshot, did not work when embedded in the FULL Gummel loop;
+% (2) robustTridiagSolve.m (dense \ solve with partial pivoting) -- gave
+%     NO improvement in the target case AND created a NEW convergence
+%     failure in another, previously working device (2-layer literature
+%     comparison). This proves the problem is not pivot protection, but stems from the
+%     condition number of the SOLUTION SPACE ITSELF of the RAW density
+%     variables (~30 orders of magnitude dynamic range) -- no
+%     linear-algebra algorithm (pivoted/unpivoted) can exceed the precision
+%     limit of double-precision arithmetic itself. The real fix requires
+%     reformulating the variables themselves (log-density/
+%     Slotboom, inside a fully coupled Newton) -- this is a separate, much
+%     larger task. REVERTED to thomasSolve.m.
 n = thomasSolve(a, b, cc, d);
 end

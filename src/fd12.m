@@ -1,6 +1,6 @@
 function [F, dlnF, lnF] = fd12(eta)
 %FD12 Normalized Fermi-Dirac integral of order 1/2, F(eta) = (2/sqrt(pi)) int_0^inf sqrt(x)/(1+exp(x-eta)) dx, so that n = Nc*F(eta)
-% (2026-11-07, round-4 review R1-3: replaces the Blakemore approximation, which saturates at n/Nc = 1/gamma = 3.7 and fails in the
+% (2026-11-07: replaces the Blakemore approximation, which saturates at n/Nc = 1/gamma = 3.7 and fails in the
 % accumulation layer at the n+-GaP/GaAsPN interface, eta = 6.4).
 % Analytic approximation of Aymerich-Humet, Serra-Mestres and Millan (Solid-State Electron. 24 (1981) 981; also Blakemore 1982):
 %   F = 1/(exp(-eta) + xi),  xi = 3*sqrt(pi/2) / u^(3/2),  u = eta + b + (|eta-b|^c + a^c)^(1/c),  with (j = 1/2)

@@ -1,5 +1,5 @@
 function S = run_paper_fd12_jv(code, icond)
-%RUN_PAPER_FD12_JV Fermi-Dirac (F_1/2) J-V curves by homotopy in the statistics (round-5 review, 2026-11-08).
+%RUN_PAPER_FD12_JV Fermi-Dirac (F_1/2) J-V curves by homotopy in the statistics (2026-11-08).
 % At every voltage the F_1/2 solution (consistent degenerate SG, assembleResidualQFPFD12.m with the expm1 Bernoulli function) is
 % started from the converged production Boltzmann state at the same voltage, with psi shifted by the difference of the two
 % equilibrium potentials. Production physics (Stage-A ARC, SRH + radiative + Auger, nominal lifetime), 0.02 V grid.

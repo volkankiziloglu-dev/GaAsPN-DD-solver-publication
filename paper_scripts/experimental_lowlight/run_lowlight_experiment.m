@@ -1,27 +1,27 @@
 function T = run_lowlight_experiment(method, codes, luxList, opts)
-%RUN_LOWLIGHT_EXPERIMENT DENEYSEL: dusuk isik (CIE 6500 K, 100/200 lx) SCREEN sorununa iki care.
+%RUN_LOWLIGHT_EXPERIMENT EXPERIMENTAL: two remedies for the low-light (CIE 6500 K, 100/200 lx) SCREEN problem.
 % method:
-%   'prod'          uretim cozucusu (gummelSolveQFPAnalytic) -- taban cizgisi
-%   'expm1'         ayni cozucu, akida yalniz sgBernoulliExpm1 cekirdegi
-%   'excess'        fazla-tasiyici (denge-cikarilmis) SG akisi (assembleResidualQFPX 'excess')
-%   'prod+vpaeval'  'prod' durumlari, akilar/artiklar vpa ile YENIDEN DEGERLENDIRILIR (cilalama yok)
-%   'prod+vpa'      'prod' durumlari + vpa artikli karisik-hassasiyetli Newton cilalamasi (uretim ayriklastirmasi)
-%   'excess+dd'     'excess' durumlari + hi/lo (double-double) durumlu fazla-tasiyici cilalama
-% Cihaz kurulumu uretimle ayni (run_paper_voc_lux.m / run_paper_spatial_profiles.m): varsayilan
+%   'prod'          production solver (gummelSolveQFPAnalytic) -- baseline
+%   'expm1'         same solver, only the sgBernoulliExpm1 kernel in the flux
+%   'excess'        excess-carrier (equilibrium-subtracted) SG flux (assembleResidualQFPX 'excess')
+%   'prod+vpaeval'  'prod' states, fluxes/residuals RE-EVALUATED in vpa (no polishing)
+%   'prod+vpa'      'prod' states + mixed-precision Newton polishing with vpa residual (production discretization)
+%   'excess+dd'     'excess' states + excess-carrier polishing with hi/lo (double-double) state
+% Device setup identical to production (run_paper_voc_lux.m / run_paper_spatial_profiles.m): default
 % AbsorberTau 600 ns, BradAbs/GaP/GaNP = paperRadiativeCoefficients(300), Auger 3e-30, ARC stageA,
-% buildCIEIndoorSpectrum('6500K',lux), Vgrid 0:0.02:1.56, ters sureklilik ile V=0, URETIM kabul
-% kapisi indoorAcceptanceGate.m (degistirilmedi). Ciktilar: results/experimental_lowlight/.
+% buildCIEIndoorSpectrum('6500K',lux), Vgrid 0:0.02:1.56, V=0 via reverse continuation, PRODUCTION acceptance
+% gate indoorAcceptanceGate.m (unchanged). Outputs: results/experimental_lowlight/.
 if nargin < 2 || isempty(codes), codes = ["RBSF-GaP","RHJ"]; end
 if nargin < 3 || isempty(luxList), luxList = [100 200]; end
 if nargin < 4, opts = struct(); end
 if ~isfield(opts,'nDigits'), opts.nDigits = 40; end
 if ~isfield(opts,'maxSweeps'), opts.maxSweeps = 6; end
-if ~isfield(opts,'convFlag'), opts.convFlag = 'polish'; end  % cilalanmis durumda yakinsama bayragi: 'polish' (kendi Newton adimi) | 'inherit' (temel cozumden)
+if ~isfield(opts,'convFlag'), opts.convFlag = 'polish'; end  % convergence flag for the polished state: 'polish' (own Newton step) | 'inherit' (from the base solution)
 if ~isfield(opts,'saveStates'), opts.saveStates = true; end
-if ~isfield(opts,'spectrum'), opts.spectrum = '6500K'; end    % '6500K' (CIE, luxList) | 'AM15G' (luxList yok sayilir)
+if ~isfield(opts,'spectrum'), opts.spectrum = '6500K'; end    % '6500K' (CIE, luxList) | 'AM15G' (luxList ignored)
 isAM = strcmpi(opts.spectrum,'AM15G');
 if isAM, luxList = NaN; end
-if ~isfield(opts,'meshScale'), opts.meshScale = 1; end   % buildPaperArchitecture meshScale (ag regresyonu)
+if ~isfield(opts,'meshScale'), opts.meshScale = 1; end   % buildPaperArchitecture meshScale (mesh regression)
 ms = opts.meshScale; mtag = ''; if ms ~= 1, mtag = sprintf('_m%g',ms); end
 warning('off','all');
 root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
@@ -34,7 +34,7 @@ Bmat = paperRadiativeCoefficients(300);
 prodTab = readtable(fullfile(root,'results','paper_voc_lux','lux_series_pce.csv'),'TextType','string');
 Vgrid = (0:0.02:1.56)';
 if isAM
-  % AM1.5G referansi: run_paper_absorber_doping_ranking (AM_UNIFIED=1), 1e17 satirlari = makale Tablo (dis mekan)
+  % AM1.5G reference: run_paper_absorber_doping_ranking (AM_UNIFIED=1), 1e17 rows = paper Table (outdoor)
   Vgrid = (0:0.02:1.70)';
   amRef = readtable(fullfile(root,'results','paper_absorber_doping_unified_am','doping_ranking.csv'),'TextType','string');
   amRef = amRef(abs(amRef.N_cm3-1e17) < 1, :);
@@ -42,7 +42,7 @@ if isAM
     'VariableNames',{'Architecture','lux','Jsc_uAcm2','Voc_mV','FF_pct','PCE_pct','Class'});
 end
 condSuffix = '';
-if ms ~= 1   % ag referansi: results/paper_mesh_richardson (uretim, 1000 lx ve AM1.5G; x2/x4 sutunlari)
+if ms ~= 1   % mesh reference: results/paper_mesh_richardson (production, 1000 lx and AM1.5G; x2/x4 columns)
   rs = readtable(fullfile(root,'results','paper_mesh_richardson','richardson_summary.csv'),'TextType','string');
   if isAM, rs = rs(rs.Condition=="AM1.5G",:); else, rs = rs(rs.Condition=="6500K_1000lx",:); end
   col = sprintf('x%g',ms); archs = unique(rs.Architecture); refRows = {};
@@ -59,7 +59,7 @@ elseif ~isequal(sort(luxList(:))',[100 200]), condSuffix = ['__' strjoin(compose
 condSuffix = [condSuffix mtag];
 tag = strrep(strrep(method,'+','_'),'>','_to_');
 if contains(method,'+') && strcmp(opts.convFlag,'inherit'), tag = [tag '_miras']; end
-if isfield(opts,'stepTol'), tag = [tag sprintf('_tol%g',opts.stepTol)]; end   % cilalama bayrak esigi (polishStateHPv3 opts.stepTol)
+if isfield(opts,'stepTol'), tag = [tag sprintf('_tol%g',opts.stepTol)]; end   % polishing flag threshold (polishStateHPv3 opts.stepTol)
 rows = {};
 for code = string(codes(:))'
   dev = buildPaperArchitecture(code, meshScale=ms, BradAbs=Bmat.GaAsPN_cm3ps, BradGaP=Bmat.GaP_cm3ps, BradGaNP=Bmat.GaPN_Ege18_cm3ps, ...
@@ -84,7 +84,7 @@ for code = string(codes(:))'
         devX = dev; devX.fluxModeX = extractBefore(method,'_rs');
         states = sweepLocal(@(V,init) gummelSolveQFPAnalyticX(devX,V,G,setfield(init,'rowScale',true)), dev, Vgrid); %#ok<SFLD>
       case {'prod>excess','prod>excessB0','prod>expm1'}
-        % sicak baslatma: her V'de uretim yakinsamis durumundan baslayip fazla-tasiyici artigi ile cozum
+        % warm start: at each V, start from the converged production state and solve with the excess-carrier residual
         devX = dev; devX.fluxModeX = extractAfter(method,'>');
         L = load(stFile('prod'),'states'); P0 = L.states; states = P0;
         for k = 1:numel(P0)
@@ -96,7 +96,7 @@ for code = string(codes(:))'
         switch method
           case 'prod+vpaeval', kind = 'vpadiff'; ns = 0;
           case 'prod+vpa',     kind = 'vpadiff'; ns = opts.maxSweeps;
-          case {'excess+dd','prod>excess+dd','prod+dd','prod+dd3'}, kind = 'ddexcess'; ns = opts.maxSweeps;   % prod+dd: excess sicak baslatmasi olmadan dogrudan uretim durumundan
+          case {'excess+dd','prod>excess+dd','prod+dd','prod+dd3'}, kind = 'ddexcess'; ns = opts.maxSweeps;   % prod+dd: directly from the production state, without the excess warm start
         end
         polishInfo = cell(numel(states),1);
         for k = 1:numel(states)
@@ -108,11 +108,11 @@ for code = string(codes(:))'
           states(k) = orderfields(sk, states(k));
         end
       otherwise
-        error('bilinmeyen yontem %s', method);
+        error('unknown method %s', method);
     end
     if opts.saveStates && any(strcmp(method,{'prod','expm1','excess','excessB0','prod>excess','prod>expm1'})), save(stFile(method),'states','Vgrid','-v7.3'); end
     gate = indoorAcceptanceGate(dev,G,Vgrid,states,Pin);
-    % --- nokta bazli tani (bolgeye gore olceklenmis rJ: kapidaki rJatK'nin aynisi) ---
+    % --- point-wise diagnostic (region-scaled rJ: same as rJatK in the gate) ---
     rJk = nan(numel(Vgrid),1);
     for k = 1:numel(Vgrid)
       if ~gate.isFinite(k), continue; end
@@ -144,7 +144,7 @@ for code = string(codes(:))'
       sum(crit & ~(gate.numericalConverged(:) & gate.poissonConverged(:))), ...
       gate.Jnoise, gate.JphotoScale, m.Jsc*1e6, m.Voc*1e3, m.FF*100, m.PCE, ...
       m.Jsc*1e6-pr.Jsc_uAcm2, m.Voc*1e3-pr.Voc_mV, m.FF*100-pr.FF_pct, m.PCE-pr.PCE_pct, char(pr.Class), nQfp, sum(f), toc(t0)}; %#ok<AGROW>
-    fprintf('%s %s %-13s : %s  (kritik gecen %d/%d)  max rJ %.3g rFB %.3g rn %.3g rp %.3g | %.1f s\n', code, cond, method, ...
+    fprintf('%s %s %-13s : %s  (critical passed %d/%d)  max rJ %.3g rFB %.3g rn %.3g rp %.3g | %.1f s\n', code, cond, method, ...
       gate.curveClass, sum(gate.pointPass(crit)), sum(crit), max(rJk(crit)), max(gate.rFB(crit)), ...
       max(gate.rnGlobal(crit)), max(gate.rpGlobal(crit)), toc(t0));
     if strcmp(method,'prod+dd3')
@@ -152,12 +152,12 @@ for code = string(codes(:))'
       D = table(Vgrid(ok), [PI.v2Converged]', [PI.polishConverged]', [PI.startOK]', [PI.totalCorr]', [PI.certStep]', [PI.bestIdx]', [PI.sweeps]', gate.numericalConverged(ok), ...
         'VariableNames',{'V_V','v2Flag','certFlag','startOK','totalCorr_V','certStep_V','bestIdx','sweeps','numConvFinal'});
       writetable(D, fullfile(outDir, sprintf('polishdiag_%s_%s_%s.csv', code, cond, tag)));
-      fprintf('   v3 bayrak: yakinsamis %d/%d (v2 %d), startOK %d, max toplam duzeltme %.3g V, max certStep %.3g V\n', ...
+      fprintf('   v3 flag: converged %d/%d (v2 %d), startOK %d, max total correction %.3g V, max certStep %.3g V\n', ...
         sum(D.numConvFinal), height(D), sum(D.v2Flag), sum(D.startOK), max(D.totalCorr_V), max(D.certStep_V));
     end
     if ~isempty(polishInfo)
       hh = cellfun(@(q) q.normHistory(end,:)./max(q.normHistory(1,:),realmin), polishInfo(~cellfun(@isempty,polishInfo)), 'UniformOutput', false);
-      hh = vertcat(hh{:}); fprintf('   cilalama: |F_n| son/ilk medyan %.3g, |F_p| son/ilk medyan %.3g\n', median(hh(:,1)), median(hh(:,2)));
+      hh = vertcat(hh{:}); fprintf('   polishing: |F_n| last/first median %.3g, |F_p| last/first median %.3g\n', median(hh(:,1)), median(hh(:,2)));
     end
   end
 end
@@ -169,7 +169,7 @@ writetable(T, fullfile(outDir, sprintf('summary_%s__%s%s.csv', tag, strjoin(stri
 end
 
 function states = sweepLocal(solve, dev, Vgrid)
-% run_paper_voc_lux.m indoorSweepLocal ile ayni sureklilik semasi.
+% Same continuation scheme as indoorSweepLocal in run_paper_voc_lux.m.
 N = dev.N; idxStart = find(abs(Vgrid-0.02)<1e-12,1);
 r002 = solve(0.02, struct('psiInit',dev.psiEq,'phinInit',zeros(N,1),'phipInit',zeros(N,1)));
 prev = r002;
@@ -182,7 +182,7 @@ end
 end
 
 function m = pvMetricsUnified(V, J, Pin)
-% cases/unified_metrics.py pv_metrics'in MATLAB karsiligi (uretim lux tablosunun cikaricisi).
+% MATLAB counterpart of pv_metrics in cases/unified_metrics.py (extractor of the production lux table).
 [V,o] = sort(V(:)); J = J(o); J = J(:);
 Jsc = NaN;
 for k = 1:numel(V)-1
@@ -214,8 +214,8 @@ m = struct('Jsc',Jsc,'Voc',Voc,'FF',Pmax/(Voc*Jsc),'PCE',Pmax*1e4/Pin*100);
 end
 
 function states = sweepAM(solve, dev, Vgrid)
-% src/runAcceptedJVSweep.m (AM1.5G uretim taramasi) ile ayni sureklilik semasi: 0.02 V'den
-% baslar, Vgrid<0.02 noktalarina ters sureklilik, ileri tarama; sonlu olmayan noktadan sonra durur.
+% Same continuation scheme as src/runAcceptedJVSweep.m (AM1.5G production sweep): starts
+% at 0.02 V, reverse continuation to Vgrid<0.02 points, forward sweep; stops after a non-finite point.
 N = dev.N; idxStart = find(abs(Vgrid-0.02)<1e-12,1);
 r = solve(Vgrid(idxStart), struct('psiInit',dev.psiEq,'phinInit',zeros(N,1),'phipInit',zeros(N,1)));
 states = repmat(r,numel(Vgrid),1); for k = 1:numel(Vgrid), states(k).isFinite = false; end

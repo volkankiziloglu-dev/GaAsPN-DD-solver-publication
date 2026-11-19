@@ -1,15 +1,15 @@
 function [F, n, p, JnSeg, JpSeg] = assembleResidualQFPHP(dev, S, V, Gprofile, kind, nDigits)
-%ASSEMBLERESIDUALQFPHP DENEYSEL genisletilmis hassasiyetli QFP artigi.
-% Durum, iki-parcali (double-double benzeri) vektorlerle verilir:
+%ASSEMBLERESIDUALQFPHP EXPERIMENTAL extended-precision QFP residual.
+% The state is given as two-part (double-double-like) vectors:
 %   psi = S.psi + S.psiLo, phin = S.phin + S.phinLo, phip = S.phip + S.phipLo
 % kind:
-%  'vpadiff'  : URETIM ayriklastirmasi (fark formu n(i+1)B(x)-n(i)B(-x)); yogunluklar, Bernoulli
-%               ve akilar vpa (nDigits basamak) ile hesaplanir, sonra double'a yuvarlanir. Bu,
-%               ayriklastirmayi degistirmeden yalniz aritmetik hassasiyetini artirir.
-%  'ddexcess' : fazla-tasiyici formu (assembleResidualQFPX 'excess') ama dphi ve dpsi farklari
-%               hi/lo parcalarindan kompanse edilerek alinir (durum nicemlemesi ~ulp(phi)/VT
-%               yerine ~ulp(dphi)/VT); tamamen double, hizli.
-% Rekombinasyon/uretim/Poisson terimleri uretimdeki gibi double'da (yuvarlanmis n,p ile).
+%  'vpadiff'  : PRODUCTION discretization (difference form n(i+1)B(x)-n(i)B(-x)); densities, Bernoulli
+%               and fluxes are computed in vpa (nDigits digits), then rounded to double. This
+%               only increases the arithmetic precision without changing the discretization.
+%  'ddexcess' : excess-carrier form (assembleResidualQFPX 'excess'), but the dphi and dpsi differences
+%               are taken with compensation from the hi/lo parts (state quantization ~ulp(dphi)/VT
+%               instead of ~ulp(phi)/VT); fully double, fast.
+% Recombination/generation/Poisson terms are in double as in production (with rounded n,p).
 if nargin < 6 || isempty(nDigits), nDigits = 40; end
 c = constants();
 N = dev.N; h = dev.h; idxJ = (1:N-1)';
@@ -43,10 +43,10 @@ switch kind
     JnSeg = coefN .* n(idxJ).*sgBernoulliExpm1(-dPsiN).*expm1(-dphin/c.VT);
     JpSeg = coefP .* p(idxJ+1).*sgBernoulliExpm1(-dPsiP).*expm1(-dphip/c.VT);
   otherwise
-    error('assembleResidualQFPHP:kind','bilinmeyen kind %s', kind);
+    error('assembleResidualQFPHP:kind','unknown kind %s', kind);
 end
 
-% --- geri kalan: uretim artiginin aynisi (double) ---
+% --- remainder: identical to the production residual (double) ---
 idxP = (2:N-1)';
 epsL = c.EPS0*0.5*(dev.eps(idxP)+dev.eps(idxP-1));
 epsR = c.EPS0*0.5*(dev.eps(idxP)+dev.eps(idxP+1));
@@ -92,9 +92,9 @@ F = zeros(3*N,1); F(1:3:end) = Fpsi; F(2:3:end) = Fphin; F(3:3:end) = Fphip;
 end
 
 function B = bernVpa(x)
-% x/(exp(x)-1) in vpa; tam sifir noktalarda B=1.
+% x/(exp(x)-1) in vpa; B=1 at exactly-zero points.
 z = (double(x) == 0);
-xs = x; xs(z) = 1;          % gecici, 0/0 onlemek icin
+xs = x; xs(z) = 1;          % temporary, to avoid 0/0
 B = xs./(exp(xs)-1);
 B(z) = 1;
 end

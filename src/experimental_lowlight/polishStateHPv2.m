@@ -1,10 +1,10 @@
 function [out, info] = polishStateHPv2(dev, r, V, Gprofile, kind, opts)
-%POLISHSTATEHPV2 DENEYSEL (v2: yakinsama bayragi cilalamanin kendi Newton adimindan; opts.convFlag) karisik-hassasiyetli Newton cilalamasi (iterative refinement).
-% Yakinsamis bir gummelSolveQFPAnalytic(X) cikisindan (r) baslar; durumu hi+lo iki parcali tutar,
-% artigi assembleResidualQFPHP(kind) ile (genisletilmis hassasiyet) hesaplar, duzeltmeyi uretimin
-% analitik blok Jacobian'lari (double) ile cozer ve lo parcasina ekler. Blok Gauss-Seidel
-% (psi, phin, phip) supurmeleri; artik normu artik dusmuyorsa durur.
-% opts.maxSweeps (6), opts.nDigits (40). maxSweeps=0 -> yalniz HP degerlendirme (cilalamasiz).
+%POLISHSTATEHPV2 EXPERIMENTAL (v2: convergence flag from the polishing's own Newton step; opts.convFlag) mixed-precision Newton polishing (iterative refinement).
+% Starts from a converged gummelSolveQFPAnalytic(X) output (r); keeps the state in two parts hi+lo,
+% computes the residual with assembleResidualQFPHP(kind) (extended precision), solves the correction with the production
+% analytic block Jacobians (double) and adds it to the lo part. Block Gauss-Seidel
+% (psi, phin, phip) sweeps; stops when the residual norm no longer decreases.
+% opts.maxSweeps (6), opts.nDigits (40). maxSweeps=0 -> HP evaluation only (no polishing).
 if nargin < 6, opts = struct(); end
 if ~isfield(opts,'maxSweeps'), opts.maxSweeps = 6; end
 if ~isfield(opts,'nDigits'), opts.nDigits = 40; end
@@ -35,7 +35,7 @@ for sweep = 1:opts.maxSweeps
     if ~all(isfinite(delta)), sweepStep = Inf; continue; end
     sweepStep = max(sweepStep, max(abs(delta)));
     hi = Sd.(names{blk}); lo = Sd.([names{blk} 'Lo']) + delta;
-    t = hi + lo; lo = lo - (t - hi); hi = t;          % yeniden normalize (fast two-sum)
+    t = hi + lo; lo = lo - (t - hi); hi = t;          % renormalize (fast two-sum)
     S.(names{blk}) = hi; S.([names{blk} 'Lo']) = lo;
     F = res(S);
   end

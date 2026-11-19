@@ -1,5 +1,5 @@
 function T = run_paper_eg_optics_shift(variant)
-%RUN_PAPER_EG_OPTICS_SHIFT Referee check: absorption edge shifted TOGETHER with the electrical bandgap (physically consistent version of the optical-edge test).
+%RUN_PAPER_EG_OPTICS_SHIFT Robustness check: absorption edge shifted TOGETHER with the electrical bandgap (physically consistent version of the optical-edge test).
 % The GaAsPN optical table is shifted rigidly by dE in {-100,-50,0,+50,+100} meV, the electrical bandgap of the absorber is shifted by the same amount
 % (so that n_i changes) and the radiative coefficient is recomputed with the van Roosbroeck-Shockley integral from the shifted table and the shifted gap.
 % variant 'CB': the shift is taken in the conduction band (chi_abs = 4.0 - dE, valence band fixed; nitrogen acts on the conduction band);

@@ -76,11 +76,11 @@ cc(idx) = coefPip1;
 b(idx) = coefPi + Rcoef;
 d(idx) = Gprofile(idx) + Rconst - Rint_perNode;
 
-% NOT (N.16 arastirmasi -- bkz. solveElectronContinuity.m'deki ayni not
-% icin tam gerekce): iki duzeltme denendi (kosegen on-kosullandirma,
-% robustTridiagSolve.m'nin kismi-pivotlamali \ cozumu), IKISI DE
-% basarisiz oldu -- sorun pivot-korumasi degil, ham yogunluk
-% degiskenlerinin kendi kosul sayisindan kaynaklaniyor. thomasSolve.m'ye
-% GERI DONULDU.
+% NOTE (N.16 investigation -- see the same note in solveElectronContinuity.m
+% for the full rationale): two fixes were tried (diagonal preconditioning,
+% robustTridiagSolve.m's partial-pivoting \ solve), BOTH
+% failed -- the problem is not pivot protection but the condition number of the raw density
+% variables themselves. REVERTED to
+% thomasSolve.m.
 p = thomasSolve(a, b, cc, d);
 end

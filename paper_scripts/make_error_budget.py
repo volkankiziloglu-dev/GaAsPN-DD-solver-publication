@@ -1,4 +1,4 @@
-"""Error budget of the key PCE differences between architectures (round-5 review R1-8), nominal devices (0.6 us), AM1.5G and 6500 K/1000 lx.
+"""Error budget of the key PCE differences between architectures, nominal devices (0.6 us), AM1.5G and 6500 K/1000 lx.
 Each entry is the change of the DIFFERENCE (points) caused by one numerical or modelling choice:
   mesh 4x       : D(4x mesh) - D(nominal)                       results/paper_mesh_richardson/richardson_summary.csv
   mesh extrap.  : D(Richardson extrapolation) - D(nominal), where the order is defined for both curves

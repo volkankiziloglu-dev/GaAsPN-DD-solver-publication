@@ -1,7 +1,7 @@
 function run_proddd3_regression(part, stepTol)
-% stepTol (istege bagli): polishStateHPv3 bayrak esigi [V]; verilirse ciktilar '_tol<deger>' etiketini alir.
-%RUN_PRODDD3_REGRESSION DENEYSEL: 'prod+dd3' = prod+dd, polishStateHPv3 (yeni yakinsama bayragi tanimi) ile.
-% part: 'm1' (100/200, 1000/2000/5000 lx, AM1.5G; ag x1) | 'm2' | 'm4' (100, 1000 lx, AM1.5G). Uretim durumlari states/ altinda hazir.
+% stepTol (optional): polishStateHPv3 flag threshold [V]; if given, outputs get the '_tol<value>' tag.
+%RUN_PRODDD3_REGRESSION EXPERIMENTAL: 'prod+dd3' = prod+dd with polishStateHPv3 (new convergence-flag definition).
+% part: 'm1' (100/200, 1000/2000/5000 lx, AM1.5G; mesh x1) | 'm2' | 'm4' (100, 1000 lx, AM1.5G). Production states are available under states/.
 root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(root,'paper_scripts','experimental_lowlight'));
 base = struct(); if nargin >= 2, base.stepTol = stepTol; end

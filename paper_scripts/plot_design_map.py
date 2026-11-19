@@ -1,4 +1,4 @@
-"""Figure (round-6 update: +-0.1-point band and mu_n = 100 curves): design map of the RHJ versus RBSF-GaP (crossover ratio r*(tau_p)) and the rear-layer gain over HJ-0.  Reads results/paper_design_map_merged/rstar.csv."""
+"""Figure (with +-0.1-point band and mu_n = 100 curves): design map of the RHJ versus RBSF-GaP (crossover ratio r*(tau_p)) and the rear-layer gain over HJ-0.  Reads results/paper_design_map_merged/rstar.csv."""
 import os
 import numpy as np, pandas as pd
 import matplotlib

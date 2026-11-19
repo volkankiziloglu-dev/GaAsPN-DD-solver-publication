@@ -1,5 +1,5 @@
 function T = run_paper_design_map_chi(chiGaP, tauList_ns, tag)
-%RUN_PAPER_DESIGN_MAP_CHI (2026-11-07, round-4 review) as run_paper_design_map_mu.m (mu_n = 500) but for a GaP electron affinity chiGaP (eV; nominal 3.8, chi_abs = 4.0), RBSF-GaP and RHJ only, S_back = 1e5, AM1.5G and 6500 K/1000 lx, unified extractor. Output results/paper_design_map_chi/design_map_chi<chiGaP>_<tag>.csv. Original: (tau_p, r, S_back) design map of RBSF-GaP versus RHJ (and the HJ-0 reference), all other parameters nominal.
+%RUN_PAPER_DESIGN_MAP_CHI (2026-11-07) as run_paper_design_map_mu.m (mu_n = 500) but for a GaP electron affinity chiGaP (eV; nominal 3.8, chi_abs = 4.0), RBSF-GaP and RHJ only, S_back = 1e5, AM1.5G and 6500 K/1000 lx, unified extractor. Output results/paper_design_map_chi/design_map_chi<chiGaP>_<tag>.csv. Original: (tau_p, r, S_back) design map of RBSF-GaP versus RHJ (and the HJ-0 reference), all other parameters nominal.
 % For every p-type lifetime tau_p in tauList_ns (ns), RBSF-GaP and HJ-0 use tau_p, and RHJ uses r*tau_p (n-type absorber) for a list of ratios r.
 % S_back = 1e5 and 1e3 cm/s; AM1.5G and CIE 6500 K / 1000 lx; production sweeps and acceptance gates as in run_paper_uncertainty_sampling_ns.m.
 % Output: results/paper_design_map/design_map_<tag>.csv (checkpointed after every tau_p).

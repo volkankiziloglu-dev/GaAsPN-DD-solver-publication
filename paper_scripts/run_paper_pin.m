@@ -1,5 +1,5 @@
 function T = run_paper_pin(part,slice)
-%RUN_PAPER_PIN n+-GaP / i-GaAsPN / p+-GaP (PIN) architecture, the structure of the grown GaAsPN cells (simulated referees R2-4, R5-M2; docs/HAKEM_SIMULASYONU_2026-11-06.md).
+%RUN_PAPER_PIN n+-GaP / i-GaAsPN / p+-GaP (PIN) architecture, the structure of the grown GaAsPN cells.
 % Same optics (ARC, TMM generation), recombination (SRH + B_rad + Auger 3e-30), contacts and unified extractor (all finite points, J_sc at 0 V,
 % linear V_oc, parabolic P_max) as the lifetime table of the paper (run_paper_referee_checks part A, merged results).
 % part 'N': PIN at the common 1.5 um GaAsPN thickness; i-layer background +1e15 (n), -1e15 (p), +1e16 (n) cm-3; tau in {600,100,10,1} ns
@@ -42,7 +42,7 @@ switch upper(part)
       for r = [1 10], jobs(end+1,:) = {'RHJ', tau, r, NaN, 1}; end %#ok<AGROW>
     end
   case 'U'
-    % homojunction with p+-GaAsPN rear layer (HJ-U) as the passivated-rear homojunction control (referees R2-4 / R5-M1), tau_p in {600,100,10,1} ns
+    % homojunction with p+-GaAsPN rear layer (HJ-U) as the passivated-rear homojunction control, tau_p in {600,100,10,1} ns
     for tau = [600 100 10 1]*1e-9, jobs(end+1,:) = {'HJ-U', tau, 1, NaN, 1}; end %#ok<AGROW>
   case 'V'
     % HJ-U with mu_n = 50 cm2/Vs at tau_p in {600,10,1} ns (companion of part M)

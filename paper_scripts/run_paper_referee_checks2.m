@@ -1,5 +1,5 @@
 function T = run_paper_referee_checks2(part)
-%RUN_PAPER_REFEREE_CHECKS2 Further referee checks (docs/HAKEM_SIMULASYONU_2026-11-04.md items 2 and 5).
+%RUN_PAPER_REFEREE_CHECKS2 Further robustness checks (absorption edge and layer thickness).
 % part 'E': GaAsPN optical-edge shift {-100,-50,0,+50,+100} meV (rigid shift of the optical table; Eg of the electrical model unchanged), all four architectures.
 % part 'T': absorber thickness scale {1,2} x rear-contact velocity {1e5,1e3,0} cm/s, all four architectures (HJ-0 base 1350 -> 2700 nm; other absorbers 1500 -> 3000 nm etc.).
 % AM1.5G and CIE 6500 K / 1000 lx, production sweeps and acceptance gates, nominal parameters otherwise.

@@ -1,4 +1,4 @@
-"""SCAPS-1D 3.3.12 cross-check of the PRODUCTION configuration (simulated referee R1-1, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+"""SCAPS-1D 3.3.12 cross-check of the PRODUCTION configuration.
 Builds (scaps_build_prod.py), runs SCAPS and compares with the MATLAB J-V (all finite points, cases/export_for_scaps_prod.m) on one voltage
 grid with one extractor (J_sc at 0 V, linear V_oc, dense-grid P_max), as scaps_all.py does for the SRH-only check.
 Usage: python scaps_prod_all.py [tag ...]   Output: scaps_output/scaps_prod_crosscheck.csv

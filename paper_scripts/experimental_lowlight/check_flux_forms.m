@@ -1,5 +1,5 @@
 function check_flux_forms(code, lux, Vpick)
-%CHECK_FLUX_FORMS DENEYSEL tani: ayni (double) durumda uretim farki, expm1, fazla-tasiyici ve vpa akilarini karsilastirir.
+%CHECK_FLUX_FORMS EXPERIMENTAL diagnostic: compares production difference, expm1, excess-carrier and vpa fluxes on the same (double) state.
 if nargin < 1, code = "RHJ"; end
 if nargin < 2, lux = 100; end
 if nargin < 3, Vpick = 0.5; end
@@ -17,7 +17,7 @@ end
 S = struct('psi',r.psi,'psiLo',zeros(N,1),'phin',r.phin,'phinLo',zeros(N,1),'phip',r.phip,'phipLo',zeros(N,1));
 tic; [~,~,~,Jn,Jp] = assembleResidualQFPHP(dev, S, V, G, 'vpadiff', 40); tv = toc; J.vpa = [Jn Jp];
 [~,~,~,Jn,Jp] = assembleResidualQFPHP(dev, S, V, G, 'ddexcess'); J.dd = [Jn Jp];
-fprintf('%s %g lx, V=%.2f, N=%d, vpa degerlendirme %.2f s, |J| ~ %.3g A/cm2\n', code, lux, V, N, tv, abs(r.J));
+fprintf('%s %g lx, V=%.2f, N=%d, vpa evaluation %.2f s, |J| ~ %.3g A/cm2\n', code, lux, V, N, tv, abs(r.J));
 ref = J.vpa;
 for m = {'prod','expm1','excess','dd'}
   dJ = J.(m{1}) - ref;

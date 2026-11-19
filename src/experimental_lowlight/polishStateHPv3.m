@@ -1,22 +1,22 @@
 function [out, info] = polishStateHPv3(dev, r, V, Gprofile, kind, opts)
-%POLISHSTATEHPV3 DENEYSEL (v3: bayrak, SAKLANAN durumdan hesaplanan Newton duzeltmesinden; baslangic ve toplam duzeltme kosullari) karisik-hassasiyetli Newton cilalamasi.
-% Yakinsamis bir gummelSolveQFPAnalytic(X) cikisindan (r) baslar; durumu hi+lo iki parcali tutar,
-% artigi assembleResidualQFPHP(kind) ile (genisletilmis hassasiyet) hesaplar, duzeltmeyi uretimin
-% analitik blok Jacobian'lari (double) ile cozer ve lo parcasina ekler. Blok Gauss-Seidel
-% (psi, phin, phip) supurmeleri; artik normu artik dusmuyorsa durur.
-% opts.maxSweeps (6), opts.nDigits (40). maxSweeps=0 -> yalniz HP degerlendirme (cilalamasiz).
+%POLISHSTATEHPV3 EXPERIMENTAL (v3: flag from the Newton correction computed from the STORED state; start and total-correction conditions) mixed-precision Newton polishing.
+% Starts from a converged gummelSolveQFPAnalytic(X) output (r); keeps the state in two parts hi+lo,
+% computes the residual with assembleResidualQFPHP(kind) (extended precision), solves the correction with the production
+% analytic block Jacobians (double) and adds it to the lo part. Block Gauss-Seidel
+% (psi, phin, phip) sweeps; stops when the residual norm no longer decreases.
+% opts.maxSweeps (6), opts.nDigits (40). maxSweeps=0 -> HP evaluation only (no polishing).
 if nargin < 6, opts = struct(); end
 if ~isfield(opts,'maxSweeps'), opts.maxSweeps = 6; end
 if ~isfield(opts,'nDigits'), opts.nDigits = 40; end
 if ~isfield(opts,'convFlag'), opts.convFlag = 'polish'; end   % 'polish' | 'inherit'
 if ~isfield(opts,'stepTol'), opts.stepTol = 1e-12; end
-if ~isfield(opts,'maxCorr'), opts.maxCorr = 0.1; end   % [V] toplam duzeltme siniri (dal atlamasi korumasi)
+if ~isfield(opts,'maxCorr'), opts.maxCorr = 0.1; end   % [V] total correction limit (protection against branch jumping)
 c = constants(); N = dev.N;
 S = struct('psi',r.psi,'psiLo',zeros(N,1),'phin',r.phin,'phinLo',zeros(N,1),'phip',r.phip,'phipLo',zeros(N,1));
 res = @(SS) assembleResidualQFPHP(dev, SS, V, Gprofile, kind, opts.nDigits);
 F = res(S);
 nrm = @(FF) [norm(FF(2:3:end)), norm(FF(3:3:end))];
-hist = nrm(F); best = S; bestN = sum(hist); bestIdx = 0;   % bestIdx: saklanan durumu ureten supurme (0 = baslangic)
+hist = nrm(F); best = S; bestN = sum(hist); bestIdx = 0;   % bestIdx: sweep that produced the stored state (0 = start)
 names = {'psi','phin','phip'};
 stepHist = [];
 for sweep = 1:opts.maxSweeps
@@ -36,7 +36,7 @@ for sweep = 1:opts.maxSweeps
     if ~all(isfinite(delta)), sweepStep = Inf; continue; end
     sweepStep = max(sweepStep, max(abs(delta)));
     hi = Sd.(names{blk}); lo = Sd.([names{blk} 'Lo']) + delta;
-    t = hi + lo; lo = lo - (t - hi); hi = t;          % yeniden normalize (fast two-sum)
+    t = hi + lo; lo = lo - (t - hi); hi = t;          % renormalize (fast two-sum)
     S.(names{blk}) = hi; S.([names{blk} 'Lo']) = lo;
     F = res(S);
   end
@@ -61,7 +61,7 @@ out.poissonResidual = max(abs(F(3*(idxP-1)+1))) / chargeScale;
 out.poissonConverged = out.poissonResidual < 1e-6;
 out.currentConservation = checkCurrentConservation(JtotSeg, out.J, 1e-7, 1e-3);
 out.continuityResiduals = checkContinuityResiduals(dev, Gprofile, n, p, JnSeg, JpSeg, psi);
-% v3 bayragi: saklanan durumdan HESAPLANAN duzeltme (bir sonraki supurmenin adimi; yoksa bu duruma giren adim).
+% v3 flag: correction COMPUTED from the stored state (the step of the next sweep; otherwise the step that entered this state).
 if numel(stepHist) > bestIdx, certStep = stepHist(bestIdx+1); elseif bestIdx > 0, certStep = stepHist(bestIdx); else, certStep = Inf; end
 totalCorr = max([max(abs(psi-r.psi)), max(abs(phin-r.phin)), max(abs(phip-r.phip))]);
 startOK = r.isFinite && isfield(r,'poissonConverged') && r.poissonConverged;

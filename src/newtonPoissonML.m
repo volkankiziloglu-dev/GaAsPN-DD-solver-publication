@@ -1,16 +1,16 @@
 function [psi, converged, iterOut, residualNorm] = newtonPoissonML(dev, psiInit, un, vp, psiLeftBC, psiRightBC, equilibriumFlag, verbose)
-% RearHJT/newtonPoissonML.m'nin kopyasi -- epsL/epsR artik c.EPS0 ile
-% carpiliyor (bkz. eps0fix_v2/newtonPoisson_v2.m ve MATHEMATICAL_MODEL.md
-% Bolum K madde 12), ARTI [converged, iterOut, residualNorm] cikislari
-% (dis inceleme madde 1.2 -- onceden SADECE psi donuyordu, cagiran kod
-% ic Poisson yakinsamasinin gercekte basarili olup olmadigini goremiyordu).
+% Copy of RearHJT/newtonPoissonML.m -- epsL/epsR are now multiplied by c.EPS0
+% (see eps0fix_v2/newtonPoisson_v2.m and MATHEMATICAL_MODEL.md
+% Section K item 12), PLUS [converged, iterOut, residualNorm] outputs
+% (external review item 1.2 -- previously ONLY psi was returned, so the calling code
+% could not see whether the inner Poisson convergence actually succeeded).
 %
-% DUZELTME (dis inceleme madde 2.2): yakinsama karari ONCEDEN SADECE
-% max(abs(delta))<deltaTol'a dayaniyordu -- kucuk bir Newton adimi HER
-% ZAMAN kucuk bir residual anlamina gelmez (kotu kosullu Jacobian, adim
-% sinirlamasi, stagnasyon). Simdi ek olarak OLCEKLENDIRILMIS residual
-% (F'nin, yerel yuk yogunlugu olcegine gore normlanmis hali) de kontrol
-% ediliyor.
+% FIX (external review item 2.2): the convergence decision PREVIOUSLY relied ONLY
+% on max(abs(delta))<deltaTol -- a small Newton step does NOT ALWAYS
+% mean a small residual (ill-conditioned Jacobian, step
+% limiting, stagnation). Now a SCALED residual
+% (F normalized by the local charge-density scale) is also
+% checked.
 if nargin < 8, verbose = false; end
 c = constants();
 N = dev.N; h = dev.h; eps_ = dev.eps; Nd = dev.Nd; Na = dev.Na;
@@ -36,7 +36,7 @@ a(idx) = coeffL; cc(idx) = coeffR;
 
 converged = false;
 deltaTol = 1e-10;
-residualTol = 1e-6; % olceklendirilmis (boyutsuz) residual esigi
+residualTol = 1e-6; % scaled (dimensionless) residual threshold
 maxIter = 60;
 for iter = 1:maxIter
   if equilibriumFlag
@@ -57,13 +57,13 @@ for iter = 1:maxIter
   d(idx) = -F;
 
   delta = thomasSolve(a, b, cc, d);
-  % DAMPED NEWTON (yeni): ic dongude hic gevseme/sinirlama yoktu -- eps0
-  % duzeltmesinden sonra (katsayilarin genis dinamik araligi yuzunden),
-  % ilk Newton adimi bazen onlarca VOLT'luk sacma bir sicrama yapabiliyor
-  % (orn. 36.75V, bkz. debug_ML_poisson_verbose.m), bu da exp() tasmasina
-  % ve NaN'a yol aciyordu. Adim buyuklugunu maxStep ile sinirlamak (yonu
-  % koruyarak, orantili kucultmek), standart bir "damped Newton" teknigi
-  % -- yakinsadiginda (delta zaten kucuk) hicbir etkisi yok.
+  % DAMPED NEWTON (new): the inner loop had no relaxation/limiting at all -- after the eps0
+  % fix (because of the wide dynamic range of the coefficients),
+  % the first Newton step could sometimes make an absurd jump of tens of VOLTS
+  % (e.g. 36.75V, see debug_ML_poisson_verbose.m), which led to exp() overflow
+  % and NaN. Limiting the step size with maxStep (preserving the direction,
+  % scaling down proportionally) is a standard "damped Newton" technique
+  % -- it has no effect once converging (delta is already small).
   maxStep = 0.5; % V
   maxAbsDelta = max(abs(delta));
   if maxAbsDelta > maxStep
@@ -83,9 +83,9 @@ for iter = 1:maxIter
 end
 iterOut = iter;
 
-% son psi'de F'yi yeniden degerlendirip gercek residual'i rapor et (delta
-% uygulanmadan ONCEKI F, son adimin ne kadar duzeltme gerektirdigini
-% gosterirdi -- burada uygulanmis psi'nin kendi residual'i daha dogru).
+% re-evaluate F at the final psi and report the true residual (the F BEFORE
+% applying delta would show how much correction the last step needed
+% -- the residual of the applied psi itself is more accurate here).
 if equilibriumFlag
   n_i = Nc .* exp((psi(idx)+chiRel)/c.VT);
   p_i = Nv .* exp(-(psi(idx)+chiRel+Eg)/c.VT);

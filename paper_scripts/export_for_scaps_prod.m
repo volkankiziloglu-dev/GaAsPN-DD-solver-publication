@@ -1,12 +1,12 @@
 function export_for_scaps_prod()
-%EXPORT_FOR_SCAPS_PROD Export of the PRODUCTION configuration for the SCAPS-1D cross-check (simulated referee R1-1, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+%EXPORT_FOR_SCAPS_PROD Export of the PRODUCTION configuration for the SCAPS-1D cross-check.
 % Unlike export_for_sesame.m (SRH only, ideal heterointerfaces), the devices keep the production recombination: bulk SRH, radiative
 % (B_rad) and Auger (3e-30 cm6/s) terms, and the GaP/GaAsPN interface recombination velocity of 8910 cm/s at every heterointerface
 % (geometric-mean interface densities in the MATLAB model). Per node: x, layer, Eg, chi, eps, Nc, Nv, Nd, Na, muN, muP, tau, Brad, Cn, Cp, G;
 % meta: Sback, interface velocities between consecutive layers, MATLAB metrics (unified extractor: all finite points, J_sc at 0 V,
 % linear V_oc, parabolic P_max) and J-V.
 % Cases (<= 6 layers for the SCAPS builder): RBSF-GaP, RHJ, F-HJ at AM1.5G (0.6 us and 10 ns) and 6500 K at 1000, 200 and 100 lx (0.6 us);
-% the 100 and 200 lx cases check the low-illuminance curves that the residual diagnostic classifies as SCREEN (referee R3-1).
+% the 100 and 200 lx cases check the low-illuminance curves that the residual diagnostic classifies as SCREEN.
 % Output: external_validation/scaps_prod_input/<tag>_nodes.csv, <tag>_mlJV.csv, <tag>_meta.json.
 assertCanonicalPath(); warning('off','all');
 root = fileparts(fileparts(mfilename('fullpath'))); outDir = fullfile(root,'external_validation','scaps_prod_input'); if ~isfolder(outDir), mkdir(outDir); end

@@ -1,4 +1,4 @@
-"""Thickness- and mobility-normalised form of the design map (round-5 review R5-M2).
+"""Thickness- and mobility-normalised form of the design map.
 Inputs: r*(tau_p) at absorber thickness W = 0.75, 1.5 and 2.25 um (mu_n = 500; results/paper_r4_analyses/DIM_*of8.csv and the nominal
 merged design map) and at mu_n = 50, 100, 150, 500 (W = 1.5 um; results/paper_design_map_mu/rstar_mu.csv). mu_p = 112 cm2/Vs.
 Dimensionless groups: electron diffusion length of the p-type absorber over W, L_e/W = sqrt(mu_n kT/q tau_p)/W; hole diffusion length of

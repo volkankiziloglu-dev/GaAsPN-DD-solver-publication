@@ -1,16 +1,16 @@
 function [F, n, p, JnSeg, JpSeg] = assembleResidualQFPX(dev, psi, phin, phip, V, Gprofile)
-%ASSEMBLERESIDUALQFPX DENEYSEL (experimental_lowlight) kopya: src/assembleResidualQFP.m ile satir
-% satir ayni; YALNIZ Scharfetter-Gummel segment akilari dev.fluxModeX ile secilir:
-%   'prod'   (varsayilan) : uretim, n(i+1)B(x)-n(i)B(-x), sgBernoulli (bit-ozdes)
-%   'expm1'               : ayni fark formu, sgBernoulliExpm1 cekirdegi
-%   'excess'              : fazla-tasiyici (denge-cikarilmis) form. n(i+1)/n(i)=exp(x-dphin/VT) ve
-%                           B(x)/B(-x)=exp(-x) ozdesliklerinden denge bileseni analitik olarak
-%                           cikarilir: Jn = qD/h*n(i)*B(-x)*expm1(-dphin/VT),
+%ASSEMBLERESIDUALQFPX EXPERIMENTAL (experimental_lowlight) copy: identical to src/assembleResidualQFP.m
+% line by line; ONLY the Scharfetter-Gummel segment fluxes are selected via dev.fluxModeX:
+%   'prod'   (default)    : production, n(i+1)B(x)-n(i)B(-x), sgBernoulli (bit-identical)
+%   'expm1'               : same difference form, sgBernoulliExpm1 kernel
+%   'excess'              : excess-carrier (equilibrium-subtracted) form. From the identities n(i+1)/n(i)=exp(x-dphin/VT) and
+%                           B(x)/B(-x)=exp(-x) the equilibrium component is subtracted
+%                           analytically: Jn = qD/h*n(i)*B(-x)*expm1(-dphin/VT),
 %                                      Jp = qD/h*p(i+1)*B(-xp)*expm1(-dphip/VT).
-%                           Karanlik dengede (dphi=0) akim TAM sifir; buyuk surukleme/difuzyon
-%                           terimlerinin farki hic alinmaz. (Heteroarayuzde Nc/Nv orani
-%                           dev.psiOffsetN/P icinde sadelesir; bkz. src/sgFluxQFPStable.m.)
-% Uretim kodu degistirilmedi.
+%                           In dark equilibrium (dphi=0) the current is EXACTLY zero; the difference of large drift/diffusion
+%                           terms is never taken. (At a heterointerface the Nc/Nv ratio
+%                           cancels inside dev.psiOffsetN/P; see src/sgFluxQFPStable.m.)
+% The production code was not changed.
 c = constants();
 N = dev.N;
 h = dev.h;
@@ -48,12 +48,12 @@ switch mode
     JnSeg = c.Q*DnSeg./h(idxJ) .* n(idxJ).*sgBernoulliExpm1(-dPsiN).*expm1(-dphin/c.VT);
     JpSeg = c.Q*DpSeg./h(idxJ) .* p(idxJ+1).*sgBernoulliExpm1(-dPsiP).*expm1(-dphip/c.VT);
   case 'excessB0'
-    % ayni fazla-tasiyici formu, uretim Bernoulli cekirdegi (sgBernoulli) ile
+    % same excess-carrier form, with the production Bernoulli kernel (sgBernoulli)
     dphin = phin(idxJ+1)-phin(idxJ); dphip = phip(idxJ+1)-phip(idxJ);
     JnSeg = c.Q*DnSeg./h(idxJ) .* n(idxJ).*sgBernoulli(-dPsiN).*expm1(-dphin/c.VT);
     JpSeg = c.Q*DpSeg./h(idxJ) .* p(idxJ+1).*sgBernoulli(-dPsiP).*expm1(-dphip/c.VT);
   otherwise
-    error('assembleResidualQFPX:mode','bilinmeyen fluxModeX: %s', mode);
+    error('assembleResidualQFPX:mode','unknown fluxModeX: %s', mode);
 end
 
 idxC = (2:N-1)';

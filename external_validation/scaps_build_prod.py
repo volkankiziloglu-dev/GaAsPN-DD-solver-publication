@@ -1,4 +1,4 @@
-"""SCAPS-1D 3.3.12 input for the PRODUCTION configuration of a paper architecture (simulated referee R1-1, docs/HAKEM_SIMULASYONU_2026-11-06.md).
+"""SCAPS-1D 3.3.12 input for the PRODUCTION configuration of a paper architecture.
 
 Same construction as scaps_build.py (layers, flat-band contacts, midgap SRH, MATLAB generation file), plus the production recombination:
   * radiative K_rad = B_rad and Auger c_n = c_p (per layer, from the exported nodes),

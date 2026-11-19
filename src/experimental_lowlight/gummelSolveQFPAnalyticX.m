@@ -1,6 +1,6 @@
 function out = gummelSolveQFPAnalyticX(dev, V, Gprofile, opts)
-% DENEYSEL (experimental_lowlight): gummelSolveQFPAnalytic.m kopyasi; tek fark artik cagrisinin
-% assembleResidualQFPX.m (dev.fluxModeX ile secilen akı formu) olmasi. Uretim kodu degistirilmedi.
+% EXPERIMENTAL (experimental_lowlight): copy of gummelSolveQFPAnalytic.m; the only difference is that the residual call goes to
+% assembleResidualQFPX.m (flux form selected by dev.fluxModeX). The production code is unchanged.
 %GUMMELSOLVEQFPANALYTIC Same Gummel-alternating QFP solver as
 % gummelSolveQFP.m, but each per-block Newton substep uses the exact
 % analytic tridiagonal Jacobian (assemblePsiJacobianAnalyticQFP.m/

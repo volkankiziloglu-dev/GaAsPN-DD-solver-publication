@@ -1,4 +1,4 @@
-"""LaTeX tables of the round-4 group-B analyses (docs/HAKEM_SIMULASYONU_2026-11-07.md), read from results/paper_r4_analyses/ (cases/analyze_r4_groupB.py)
+"""LaTeX tables of the group-B robustness analyses, read from results/paper_r4_analyses/ (cases/analyze_r4_groupB.py)
 and results/paper_perimeter/ (cases/analyze_perimeter_loss.py). Writes latex/tables/supp_r4B_<name>.tex."""
 import os
 import numpy as np, pandas as pd

@@ -1,5 +1,5 @@
 function T = run_paper_voc_lux(code, tauList_ns)
-%RUN_PAPER_VOC_LUX Light-intensity dependence of V_oc (slope dV_oc/dlog10(lux), ideality) of one architecture under the CIE 6500 K spectrum (referee check).
+%RUN_PAPER_VOC_LUX Light-intensity dependence of V_oc (slope dV_oc/dlog10(lux), ideality) of one architecture under the CIE 6500 K spectrum.
 % lux = 50, 100, 200, 500, 1000, 2000, 5000; absorber lifetime tauList_ns (default 600 and 10 ns; the RHJ absorber has the same lifetime, r = 1); production settings,
 % all finite points of every curve are saved (cases/analyze_voc_lux.py extracts the metrics with the common extractor).
 % Output: results/paper_voc_lux/<code>_tau<ns>_<lux>lx.csv and voc_lux_<code>.csv (class, timing).

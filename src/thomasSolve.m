@@ -1,22 +1,22 @@
 function x = thomasSolve(a, b, c, d)
 % Solve tridiagonal system a(i)x(i-1)+b(i)x(i)+c(i)x(i+1)=d(i). a(1),c(n) unused.
 %
-% DUZELTME (dis inceleme madde 1.3): ONCEDEN sifira yakin/kucuk pivot
-% (m = b(i)-a(i)*cp(i-1)) icin HICBIR koruma yoktu -- Inf/NaN/buyuk iptal
-% hatasi uretebilirdi (warm-up rampasinin gerekcesinde gecmiste tam da
-% bu turden bir kotu-kosullanma yasandigi belirtilmisti, bkz.
-% MATHEMATICAL_MODEL.md Bolum K). Pivot mutlak degeri, HER SATIRIN
-% KENDI b(i) olcegine gore (satir-yerel) normlanmis bir esigin altina
-% duserse UYARI verilip NaN vektoru donduruluyor.
+% FIX (external review item 1.3): PREVIOUSLY there was NO protection for a near-zero/small pivot
+% (m = b(i)-a(i)*cp(i-1)) -- it could produce Inf/NaN/large cancellation
+% errors (the rationale of the warm-up ramp noted that in the past exactly
+% this kind of ill-conditioning had occurred, see
+% MATHEMATICAL_MODEL.md Section K). If the absolute pivot value falls below a threshold
+% normalized to EACH ROW'S OWN b(i) scale (row-local),
+% a WARNING is issued and a NaN vector is returned.
 %
-% ONEMLI: ilk versiyon TEK, GLOBAL bir esik kullanmisti (norm(b,inf)
-% temelli) -- bu, sinir-kosulu satirlarinda (b(1)=1, kasitli olarak
-% normlanmis Dirichlet denklemi) YANLIS ALARM veriyordu, cunku ic
-% dugumlerin difuzyon katsayilari (b~1e13-1e15 mertebesinde olabilir,
-% bkz. K.12'nin Case B izlemesi) global normu domine edip b(1)=1'i
-% "sifira yakin" gibi gosteriyordu (capraz-kontrol scripti calistirilinca
-% HEMEN yakalandi -- debug_thomassolve_crosscheck.m). Duzeltme: esik
-% HER SATIRIN KENDI b(i) buyuklugune gore ayri ayri hesaplaniyor.
+% IMPORTANT: the first version used a SINGLE, GLOBAL threshold (norm(b,inf)
+% based) -- this gave FALSE ALARMS on the boundary-condition rows (b(1)=1, a deliberately
+% normalized Dirichlet equation), because the diffusion coefficients of interior
+% nodes (b can be of order 1e13-1e15,
+% see K.12's Case B trace) dominated the global norm and made b(1)=1
+% look "near zero" (caught IMMEDIATELY when the cross-check script was run
+% -- debug_thomassolve_crosscheck.m). Fix: the threshold is computed
+% separately according to EACH ROW'S OWN b(i) magnitude.
 n = length(b);
 relTol = 1e-12;
 
